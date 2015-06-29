@@ -9,12 +9,11 @@ from ConfigParser import SafeConfigParser
 
 import mountpoint_conversion
 
-NUM_SIGNED_FLOAT_FIELD_NAMES = ['rot_start_entry','rot_end_entry']
+NUM_SIGNED_FLOAT_FIELD_NAMES = ['mot1_start_entry','mot1_end_entry','mot2_start_entry','mot2_end_entry']
 
-NUM_FLOAT_FIELD_NAMES = ['acq_time_entry',
-                        'z_range_entry','z_center_entry']
+NUM_FLOAT_FIELD_NAMES = ['acq_time_entry']
 
-NUM_INTEGER_FIELD_NAMES = ['rot_step_entry','z_step_entry',
+NUM_INTEGER_FIELD_NAMES = ['mot1_step_entry','mot2_step_entry',
                         'acq_img_number_entry']
 
 FILENAME_CHARS = "-_%s%s" % (string.ascii_letters,string.digits)
@@ -44,7 +43,7 @@ class DiffControl:
         gtk.main_quit()
 
 
-    # Constructor
+    # Constructor, called automatically when an object is created
     def __init__(self):
         self.builder = gtk.Builder()
         self.builder.add_from_file("diff_control.glade")
@@ -132,24 +131,29 @@ class DiffControl:
 
     def get_values_from_controls(self,widget):
         print('get_values_from_controls')
-        text = self.builder.get_object('rot_start_entry').get_text()
-        self.mRotStart = self.convert_text_to_float(text)
 
-        text = self.builder.get_object('rot_end_entry').get_text()
-        self.mRotEnd = self.convert_text_to_float(text)
+        # Motor 1
+        text = self.builder.get_object('mot1_start_entry').get_text()
+        self.mMot1Start = self.convert_text_to_float(text)
+
+        text = self.builder.get_object('mot1_end_entry').get_text()
+        self.mMot1End = self.convert_text_to_float(text)
             
-        text = self.builder.get_object('rot_step_entry').get_text()
-        self.mRotStep = self.convert_text_to_float(text)
+        text = self.builder.get_object('mot1_step_entry').get_text()
+        self.mMot1Step = self.convert_text_to_float(text)
 
-        text = self.builder.get_object('z_range_entry').get_text()
-        self.mZRange = self.convert_text_to_float(text)
+        # Motor 2
+        text = self.builder.get_object('mot2_start_entry').get_text()
+        self.mMot2Start = self.convert_text_to_float(text)
+
+        text = self.builder.get_object('mot2_end_entry').get_text()
+        self.mMot2End = self.convert_text_to_float(text)
             
-        text = self.builder.get_object('z_center_entry').get_text()
-        self.mZCenter = self.convert_text_to_float(text)
-        
-        text = self.builder.get_object('z_step_entry').get_text()
-        self.mZStep = self.convert_text_to_float(text)
+        text = self.builder.get_object('mot2_step_entry').get_text()
+        self.mMot2Step = self.convert_text_to_float(text)
 
+
+        # Acquisition
         text = self.builder.get_object('acq_time_entry').get_text()
         self.mAcqTime = self.convert_text_to_float(text)
 
@@ -169,17 +173,22 @@ class DiffControl:
             result = 0
                         
         return result
-        
+
+            
     def set_values_to_controls(self):
         print('set_values_to_controls')
-        self.builder.get_object('rot_start_entry').set_text(str(self.mRotStart))
-        self.builder.get_object('rot_end_entry').set_text(str(self.mRotEnd))
-        self.builder.get_object('rot_step_entry').set_text(str(self.mRotStep))
 
-        self.builder.get_object('z_center_entry').set_text(str(self.mZCenter))
-        self.builder.get_object('z_range_entry').set_text(str(self.mZRange))
-        self.builder.get_object('z_step_entry').set_text(str(self.mZStep))
+        # Motor 1
+        self.builder.get_object('mot1_start_entry').set_text(str(self.mMot1Start))
+        self.builder.get_object('mot1_end_entry').set_text(str(self.mMot1End))
+        self.builder.get_object('mot1_step_entry').set_text(str(self.mMot1Step))
 
+        # Motor 2
+        self.builder.get_object('mot2_start_entry').set_text(str(self.mMot2Start))
+        self.builder.get_object('mot2_end_entry').set_text(str(self.mMot2End))
+        self.builder.get_object('mot2_step_entry').set_text(str(self.mMot2Step))
+        
+        # Other
         self.builder.get_object('acq_time_entry').set_text(str(self.mAcqTime))
         self.builder.get_object('acq_img_number_entry').set_text(str(self.mAcqCount))
         self.builder.get_object('acq_filename_entry').set_text(self.mFileNamePrefix)
@@ -189,12 +198,42 @@ class DiffControl:
 
 
 
+    def set_labels_and_hideshow_fields(self):
+        # Set the labels for motors and hide motor2 controls if necessary
+        if self.mScanType in [0,1,2] :
+            # Hide motor 2 fields
+            self.builder.get_object('mot2_label1').set_visible(False)
+            self.builder.get_object('mot2_label2').set_visible(False)
+            self.builder.get_object('mot2_label3').set_visible(False)
+            self.builder.get_object('mot2_step_size').set_visible(False)
+            self.builder.get_object('mot2_start_entry').set_visible(False)
+            self.builder.get_object('mot2_end_entry').set_visible(False)
+            self.builder.get_object('mot2_step_entry').set_visible(False)
+            self.builder.get_object('slow_axis_label').set_visible(False)
+            self.builder.get_object('fast_axis_label').set_visible(False)
+
+        else :
+            # Show motor 2 fields
+            self.builder.get_object('mot2_label1').set_visible(True)
+            self.builder.get_object('mot2_label2').set_visible(True)
+            self.builder.get_object('mot2_label3').set_visible(True)
+            self.builder.get_object('mot2_step_size').set_visible(True)
+            self.builder.get_object('mot2_start_entry').set_visible(True)
+            self.builder.get_object('mot2_end_entry').set_visible(True)
+            self.builder.get_object('mot2_step_entry').set_visible(True)
+            self.builder.get_object('slow_axis_label').set_visible(True)
+            self.builder.get_object('fast_axis_label').set_visible(True)
+
+
+        # Then change the labels
+        
+        
     def update_summary_fields(self):
-        nrot = self.mRotStep
-        nz = self.mZStep
+        n1 = self.mMot1Step
+        n2 = self.mMot2Step
     
         
-        scantime = nrot*nz*self.mAcqTime*self.mAcqCount
+        scantime = n1*n2*self.mAcqTime*self.mAcqCount
         if scantime < 0:
             scantime = 0            
         self.builder.get_object('estimated_scan_time_display').set_text(str(datetime.timedelta(seconds=scantime)))
@@ -209,30 +248,32 @@ class DiffControl:
             self.builder.get_object('save_location_warning_image').set_from_stock(gtk.STOCK_DIALOG_WARNING,gtk.ICON_SIZE_BUTTON)
             self.builder.get_object('save_location_warning_image').set_tooltip_text("Path not available on the server side. \nSaving images locally to \nPilatus server")
             
-        rsize = self.calc_rot_step_size()
-        zsize = self.calc_z_step_size()
-        self.builder.get_object('rot_step_size').set_text('Step size: ' + '%.2f' % rsize + u'\N{DEGREE SIGN}')
-        self.builder.get_object('z_step_size').set_text('Step size: ' + '%.3f' % zsize + ' mm')
+        mot1size = self.calc_mot1_step_size()
+        mot2size = self.calc_mot2_step_size()
+        self.builder.get_object('mot1_step_size').set_text('Step size: ' + '%.2f' % mot1size + u'\N{DEGREE SIGN}')
+        self.builder.get_object('mot2_step_size').set_text('Step size: ' + '%.3f' % mot2size + ' mm')
         
 
 
-    def calc_rot_step_size(self):
-        rotsize = 0
-        if (self.mRotStep > 0):
-            rotsize = (abs(self.mRotEnd-self.mRotStart) / self.mRotStep)
+    def calc_mot1_step_size(self):
+        mot1size = 0
+        if (self.mMot1Step > 0):
+            mot1size = (abs(self.mMot1End-self.mMot1Start) / self.mMot1Step)
  
-        return rotsize
+        return mot1size
 
-        
-    def calc_z_step_size(self):
-        zsize = 0
-        if (self.mZStep > 1):
-            zsize = (self.mZRange / (self.mZStep -1))
+    def calc_mot2_step_size(self):
+        mot2size = 0
+        if (self.mMot2Step > 0):
+            mot2size = (abs(self.mMot2End-self.mMot2Start) / self.mMot2Step)
  
-        return zsize
+        return mot2size
 
     def init_values(self):
          # Set hard coded defaults
+        self.mMot1MovememntType = 0
+        self.mScanType = 0
+
         self.mRotStart = 0
         self.mRotEnd = 180
         self.mRotStep = 18
@@ -247,6 +288,10 @@ class DiffControl:
         self.mFileNamePrefix = 'IMG_diffraction'
         self.mScanRunning = False
 
+        self.mLocalSavePath = ""
+        self.mServerSidePath = ""
+        self.mSavePathOK = False
+                
         # Load from config file values that exist there
         self.read_config_file()
                 
@@ -259,19 +304,29 @@ class DiffControl:
         # Load from config file values that exist there
         cp = SafeConfigParser()
         cp.read(CONFIG_FILE_NAME)
+        if cp.has_option('ScanParameters','scantype'):  
+            self.mScanType = cp.getint('ScanParameters','scantype')
+        if cp.has_option('ScanParameters','mot1movementtype'):  
+            self.mMot1MovementType = cp.getint('ScanParameters','mot1movementtype')        
+
         
-        if cp.has_option('ScanParameters','RotStart'):  
-            self.mRotStart = cp.getfloat('ScanParameters','RotStart')
-        if cp.has_option('ScanParameters','RotEnd'):  
-            self.mRotEnd = cp.getfloat('ScanParameters','RotEnd')
-        if cp.has_option('ScanParameters','RotStep'):  
-            self.mRotStep = cp.getint('ScanParameters','RotStep')
-        if cp.has_option('ScanParameters','ZCenter'):  
-            self.mZCenter = cp.getfloat('ScanParameters','ZCenter')
-        if cp.has_option('ScanParameters','ZRange'):  
-            self.mZRange = cp.getfloat('ScanParameters','ZRange')
-        if cp.has_option('ScanParameters','ZStep'):  
-            self.mZStep = cp.getint('ScanParameters','ZStep')
+        # Motor 1        
+        if cp.has_option('ScanParameters','mot1start'):  
+            self.mMot1Start = cp.getfloat('ScanParameters','mot1start')
+        if cp.has_option('ScanParameters','mot1end'):  
+            self.mMot1End = cp.getfloat('ScanParameters','mot1end')
+        if cp.has_option('ScanParameters','mot1step'):  
+            self.mMot1Step = cp.getint('ScanParameters','mot1step')
+
+        # Motor 2
+        if cp.has_option('ScanParameters','mot2start'):  
+            self.mMot2Start = cp.getfloat('ScanParameters','mot2start')
+        if cp.has_option('ScanParameters','mot2end'):  
+            self.mMot2End = cp.getfloat('ScanParameters','mot2end')
+        if cp.has_option('ScanParameters','mot2step'):  
+            self.mMot2Step = cp.getint('ScanParameters','mot2step')
+
+        # Other
         if cp.has_option('ScanParameters','AcqTime'):  
             self.mAcqTime = cp.getfloat('ScanParameters','AcqTime')
         if cp.has_option('ScanParameters','AcqCount'):  
@@ -286,12 +341,17 @@ class DiffControl:
         cp = SafeConfigParser()
         cp.read(CONFIG_FILE_NAME)
 
-        cp.set('ScanParameters','RotStart','%.6f' % self.mRotStart)
-        cp.set('ScanParameters','RotEnd','%.6f' % self.mRotEnd)
-        cp.set('ScanParameters','RotStep','%d' % self.mRotStep)
-        cp.set('ScanParameters','ZCenter','%.6f' % self.mZCenter)
-        cp.set('ScanParameters','ZRange','%.6f' % self.mZRange)
-        cp.set('ScanParameters','ZStep','%d' % self.mZStep)
+        # Motor 1
+        cp.set('ScanParameters','mot1start','%.6f' % self.mMot1Start)
+        cp.set('ScanParameters','mot1end','%.6f' % self.mMot1End)
+        cp.set('ScanParameters','mot1step','%d' % self.mMot1Step)
+
+        # Motor 2
+        cp.set('ScanParameters','mot2start','%.6f' % self.mMot2Start)
+        cp.set('ScanParameters','mot2end','%.6f' % self.mMot2End)
+        cp.set('ScanParameters','mot2step','%d' % self.mMot2Step)
+
+        # Other
         cp.set('ScanParameters','AcqTime','%.6f' % self.mAcqTime)
         cp.set('ScanParameters','AcqCount','%d' % self.mAcqCount)
         cp.set('ScanParameters','FileNamePrefix',self.mFileNamePrefix)
@@ -341,11 +401,17 @@ class DiffControl:
         self.builder.get_object('start_scan_button').set_sensitive(not self.mScanRunning)
 
         
+    def movementTypeChanged(self,combobox):
+        self.mMovementType = combobox.get_active()
+        self.set_labels_and_hideshow_fields()
 
-
+    def scanTypeChanged(self,combobox):
+        print 'scanTypeChanged'
+        self.mScanType = combobox.get_active()
+        self.set_labels_and_hideshow_fields()
               
 # If the program is run directly or passed as an argument to the python
 # interpreter then create a HelloWorld instance and show it
 if __name__ == "__main__":
-    hello = DiffControl()
-    hello.run()
+    dc = DiffControl()
+    dc.run()
