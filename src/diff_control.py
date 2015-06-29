@@ -1,28 +1,27 @@
-# example helloworld.py
-
 import pygtk
 pygtk.require('2.0')
 import gtk
+import gobject
 import string
 import datetime
+import time
+import threading
 from ConfigParser import SafeConfigParser
 
 import mountpoint_conversion
+import can_control
+from motor_axis import MotorAxis
 
+USE_MOTORS = True
+
+
+# Field IDs for checking correct numeric format
 NUM_SIGNED_FLOAT_FIELD_NAMES = ['mot1_start_entry','mot1_end_entry','mot2_start_entry','mot2_end_entry']
-
 NUM_FLOAT_FIELD_NAMES = ['acq_time_entry']
-
-NUM_INTEGER_FIELD_NAMES = ['mot1_step_entry','mot2_step_entry',
-                        'acq_img_number_entry']
+NUM_INTEGER_FIELD_NAMES = ['mot1_step_entry','mot2_step_entry','acq_img_number_entry']
 
 FILENAME_CHARS = "-_%s%s" % (string.ascii_letters,string.digits)
 CONFIG_FILE_NAME = 'config.ini'
-
-#MOT1_LABEL1 = ['Z Start [mm]','Y Start [mm]','Rot Start [deg]','Z Start [mm]','Rot Start [deg]','Z Start [mm]']
-#MOT1_LABEL2 = ['Z End [mm]','Y End [mm]','Rot End [deg]','Z End [mm]','Rot End [deg]','Z End [mm]']
-#MOT1_LABEL3 = ['Z Steps','Y Steps','Rot Steps','Z Steps','Rot Steps','Z Steps']
-
 
 SCAN_TYPE_MOT1_NAMES = ['Z','Y','Rot','Z','Rot','Z']
 SCAN_TYPE_MOT2_NAMES = ['','','','Y','Z','Rot']
@@ -62,6 +61,11 @@ class DiffControl:
     def on_main_window_destroy(self, widget, data=None):
         print "destroy signal occurred"
         self.write_config_file() # write the changed configurations
+        self.stop_scan()
+
+        if USE_MOTORS:
+            can_control.releasePCAN()
+            
         gtk.main_quit()
 
 
@@ -70,9 +74,9 @@ class DiffControl:
         self.builder = gtk.Builder()
         self.builder.add_from_file("diff_control.glade")
         self.init_values() # init values before connecting the fields
-
-        self.builder.connect_signals(self)
         
+        self.builder.connect_signals(self)
+        self.mScanRunning = False
         
         for i in NUM_SIGNED_FLOAT_FIELD_NAMES:
             entry = self.builder.get_object(i)
@@ -90,7 +94,14 @@ class DiffControl:
         self.constrain_filename(entry)
         self.update_view()
 
+        # if threads do not wor, pygtk may have been compiled without thread support
+#        gtk.gdk.threads_init() # Needed for pygtk and threads to work and able to touch GUI
+        gobject.threads_init() # Alternatively, threads do not touch GUI
 
+        if USE_MOTORS :
+            self.mZAxis = MotorAxis(2)
+            self.mYAxis = MotorAxis(1)
+            self.mRotAxis = MotorAxis(3)
         
     # start the event-loop (and end of control here)
     def run(self):
@@ -267,11 +278,21 @@ class DiffControl:
 
     # Does all view updates
     def update_view(self):
-        self.update_control_buttons()
+        self.set_widgets_sensitivity()
         self.set_labels_and_hideshow_fields()
         self.update_summary_fields()
 
-                
+
+
+    def set_widgets_sensitivity(self):
+        # Set the widgets inactive if scan is running, and active if scan is not running
+        self.builder.get_object('menubar1').set_sensitive(not self.mScanRunning)
+        self.builder.get_object('hbox2').set_sensitive(not self.mScanRunning)
+        self.builder.get_object('frame1').set_sensitive(not self.mScanRunning)
+        self.builder.get_object('frame2').set_sensitive(not self.mScanRunning)
+        self.builder.get_object('start_scan_button').set_sensitive(not self.mScanRunning)
+        self.builder.get_object('stop_scan_button').set_sensitive(self.mScanRunning)
+        
     def update_summary_fields(self):
         n1 = self.mMot1Step
         n2 = self.mMot2Step
@@ -426,26 +447,26 @@ class DiffControl:
             print 'Closed, no files selected'
 			
 
-    def start_scan(self, widget, data = None):
+    def start_scan(self, widget = None, data = None):
         self.mScanRunning = True
         # Set the parameters for the detector
-        1
+
         # Start a thread to do the scanning
-    
+        self.mScanThread = threading.Thread(target = self.scanThreadEntry)
+        self.mScanThread.start()
+        
         # activate the stop scan and deactivate the start scan button
         self.update_view()
         
-    def stop_scan(self, widget, data = None):
-        self.mScanRunning = False
+    def stop_scan(self, widget = None, data = None):
+        if self.mScanRunning :
+            # Stop the scan thread
+            self.mScanRunning = False
+            self.mScanThread.join()
         
-        # Stop the scan thread
-        2
+        # update the controls
         self.update_view()
         
-
-    def update_control_buttons(self):
-        self.builder.get_object('stop_scan_button').set_sensitive(self.mScanRunning)
-        self.builder.get_object('start_scan_button').set_sensitive(not self.mScanRunning)
 
         
     def movementTypeChanged(self,combobox):
@@ -456,7 +477,31 @@ class DiffControl:
         print 'scanTypeChanged'
         self.mScanType = combobox.get_active()
         self.update_view()
-              
+
+
+
+
+
+
+
+
+    def scanThreadEntry(self):
+        print 'Starting scan thread'
+        while (self.mScanRunning) :
+            # Here we have 3 types of activities
+            # 1. set new target positions
+            # 2. acquire new image
+            # 3. wait for movements or images to finish
+            #
+            # We should be able to stop each activity in case mScanRunning is switched
+            # to false (1 second response time is reasonably good)
+            #
+            print 'Scan thread is running'
+            time.sleep(1)
+
+        print 'Scan thread ended'
+
+        
 # If the program is run directly or passed as an argument to the python
 # interpreter then create a HelloWorld instance and show it
 if __name__ == "__main__":
