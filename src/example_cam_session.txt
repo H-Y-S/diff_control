@@ -1,0 +1,27 @@
+exptime
+15 OK Exposure time set to: 1.000000 sec.
+imgpath
+10 OK /home/det/p2_det/images/
+imgpath /data/01/HS/pilatus_testing
+10 OK /data/01/HS/pilatus_testing/
+exptime
+15 OK Exposure time set to: 1.000000 sec.
+exptime 60
+15 OK Exposure time set to: 60.000000 sec.
+exposure kuva00006.tif
+15 OK  Starting 60.000000 second background: 2015-Jun-30T22:20:59.459
+K
+ResetCam
+7 ERR /data/01/HS/pilatus_testing/kuva00006.tif15 OK
+exptime 5
+15 OK Exposure time set to: 5.000000 sec.exposure kuva0008.tif
+15 OK  Starting 5.000000 second background: 2015-Jun-30T22:21:38.5457 OK /data/01/HS/pilatus_testing/kuva0008.tif^[[A
+
+
+exposure kuva0009.tif
+15 OK  Starting 5.000000 second background: 2015-Jun-30T22:21:59.298
+7 OK /data/01/HS/pilatus_testing/kuva0009.tif
+exposure kuva0010.tif
+15 OK  Starting 5.000000 second background: 2015-Jun-30T22:22:16.376
+ResetCam
+7 ERR /data/01/HS/pilatus_testing/kuva0010.tif15 OK

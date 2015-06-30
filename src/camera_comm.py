@@ -69,7 +69,66 @@ class CameraComm:
             return False
         else:
             return True
+
             
+    def get_exp_period(self):
+        # Send command
+        self.mTN.write("expperiod")
+
+        # Read response
+        resp = self.mTN.read_some()
+
+        # Parse response
+        time = -1
+        code,resp = resp.split(' ',1)
+        ok,resp = resp.split(' ',1)
+        if (ok == "OK"):		
+            tmp,resp = resp.split(':',1)
+            time,resp = resp.strip().split(' ',1)
+
+        # Return the answer (-1 on error)
+        return time
+
+
+    def set_exp_period(self,newExpPeriod):
+        # Send command
+        self.mTN.write("expperiod " + str(newExpPeriod))
+
+        # Read response
+        resp = self.mTN.read_some()
+
+        # Parse response
+        code,resp = resp.split(' ',1)
+        ok,resp = resp.split(' ',1)
+ 
+        # Return true on success false on error
+        if (not ok == "OK"):		
+            return False
+        else:
+            return True
+
+    def expose_image(self,imageFileName):
+        # Send command
+        self.mTN.write("exposure " + imageFileName)
+
+        # The first response is to acknowledge the acquisition start
+        # Read response
+        resp = self.mTN.read_some()
+
+        # Parse response
+        code,resp = resp.split(' ',1)
+        ok,resp = resp.split(' ',1)
+ 
+        # After image acquisition finishes, there will be another acknowledgement
+        # Return true on success false on error
+        if (not ok == "OK"):		
+            return False
+        else:
+            return True
+
+# Seems that 'stop' can be used to stop the exposure (stop DCB)
+# ResetCam seems more appropriate command for stopping the camera
+
 
 
     def get_img_path(self):
@@ -85,7 +144,7 @@ class CameraComm:
 
 
     # Sets the path for saved images
-    # the given path is in given in the 
+    # the given path is given in the 
     # path space available on the 
     # camera control computer
     def set_img_path(self,newpath):
@@ -115,6 +174,7 @@ class CamTest:
         self.builder.add_from_file("camera_test.glade")
 
         self.builder.connect_signals(self)
+        self.mCC = CameraComm("10.110.11.141",41234)
         
         self.read_values_from_server()
         
@@ -132,6 +192,7 @@ class CamTest:
         # This is useful for popping up 'are you sure you want to quit?'
         # type dialogs.
         print "delete event occurred"
+        self.mCC.close_connection()    
 
         # Change FALSE to TRUE and the main window will not be destroyed
         # with a "delete_event".
@@ -148,13 +209,12 @@ class CamTest:
     
     
     def read_values_from_server(self):
-        cc = CameraComm("10.110.11.141",41234)
-        val = cc.get_exp_time()
+        val = self.mCC.get_exp_time()
         self.builder.get_object('exp_time_entry').set_text(val)
-        val = cc.get_img_path()
+        val = self.mCC.get_img_path()
         print val
         self.builder.get_object('img_path_entry').set_text(val)
-        cc.close_connection()    
+
 
     def write_values_to_server(self):
         self.builder.get_object('exp_time_entry').get_text()
