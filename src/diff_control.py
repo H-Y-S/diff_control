@@ -21,13 +21,14 @@ NUM_FLOAT_FIELD_NAMES = ['acq_time_entry']
 NUM_INTEGER_FIELD_NAMES = ['mot1_step_entry','mot2_step_entry','acq_img_number_entry']
 
 FILENAME_CHARS = "-_%s%s" % (string.ascii_letters,string.digits)
-CONFIG_FILE_NAME = 'config.ini'
+DEFAULT_CONFIG_FILE_NAME = 'config.ini'
 
 SCAN_TYPE_MOT1_NAMES = ['Z','Y','Rot','Z','Rot','Z']
 SCAN_TYPE_MOT2_NAMES = ['','','','Y','Z','Rot']
 SCAN_TYPE_MOT1_UNITS = ['mm','mm','deg','mm','deg','mm']
 SCAN_TYPE_MOT2_UNITS = ['','','','mm','mm','deg']
 
+SINGLE_MOTOR_SCANS = [0,1,2]
 
 class DiffControl:
     # This one is called when the main window is shown
@@ -60,7 +61,7 @@ class DiffControl:
     # delete_event returns null)
     def on_main_window_destroy(self, widget, data=None):
         print "destroy signal occurred"
-        self.write_config_file() # write the changed configurations
+        self.write_config_file(DEFAULT_CONFIG_FILE_NAME) # write the changed configurations
         self.stop_scan()
 
         if USE_MOTORS:
@@ -93,7 +94,8 @@ class DiffControl:
         entry = self.builder.get_object('acq_filename_entry')
         self.constrain_filename(entry)
         self.update_view()
-
+        self.mLastLoadedConfigFileName = ''
+        
         # if threads do not wor, pygtk may have been compiled without thread support
 #        gtk.gdk.threads_init() # Needed for pygtk and threads to work and able to touch GUI
         gobject.threads_init() # Alternatively, threads do not touch GUI
@@ -102,7 +104,11 @@ class DiffControl:
             self.mZAxis = MotorAxis(2)
             self.mYAxis = MotorAxis(1)
             self.mRotAxis = MotorAxis(3)
-        
+
+        self.MOTOR1_MAPPINGS = [self.mZAxis, self.mYAxis, self.mRotAxis, self.mZAxis, self.mRotAxis, self.mZAxis]
+        self.MOTOR2_MAPPINGS = [None,None,None,self.mYAxis,self.mZAxis,self.mRotAxis]
+
+
     # start the event-loop (and end of control here)
     def run(self):
         self.builder.get_object("main_window").show_all()
@@ -236,7 +242,7 @@ class DiffControl:
 
     def set_labels_and_hideshow_fields(self):
         # Set the labels for motors and hide motor2 controls if necessary
-        if self.mScanType in [0,1,2] :
+        if self.mScanType in SINGLE_MOTOR_SCANS :
             # Hide motor 2 fields
             self.builder.get_object('mot2_label1').hide()
             self.builder.get_object('mot2_label2').hide()
@@ -295,8 +301,12 @@ class DiffControl:
         
     def update_summary_fields(self):
         n1 = self.mMot1Step
-        n2 = self.mMot2Step
-    
+
+        if self.mScanType in SINGLE_MOTOR_SCANS :
+            n2 = 1
+        else :
+            n2 = self.mMot2Step
+            
         
         scantime = n1*n2*self.mAcqTime*self.mAcqCount
         if scantime < 0:
@@ -325,15 +335,19 @@ class DiffControl:
 
     def calc_mot1_step_size(self):
         mot1size = 0
-        if (self.mMot1Step > 0):
-            mot1size = (abs(self.mMot1End-self.mMot1Start) / self.mMot1Step)
- 
+        if self.mMot1MovementType == 0: # Step-by-step
+            if (self.mMot1Step > 0):
+                mot1size = (abs(self.mMot1End-self.mMot1Start) / (self.mMot1Step-1))            
+        else : # Continuous
+            if (self.mMot1Step > 1):
+                mot1size = (abs(self.mMot1End-self.mMot1Start) / (self.mMot1Step))                        
+
         return mot1size
 
     def calc_mot2_step_size(self):
         mot2size = 0
-        if (self.mMot2Step > 0):
-            mot2size = (abs(self.mMot2End-self.mMot2Start) / self.mMot2Step)
+        if (self.mMot2Step > 1):
+            mot2size = (abs(self.mMot2End-self.mMot2Start) / (self.mMot2Step-1))
  
         return mot2size
 
@@ -342,13 +356,13 @@ class DiffControl:
         self.mMot1MovememntType = 0
         self.mScanType = 0
 
-        self.mRotStart = 0
-        self.mRotEnd = 180
-        self.mRotStep = 18
+        self.mMot1Start = 0
+        self.mMot1End = 180
+        self.mMot1Step = 18
 
-        self.mZCenter = 200
-        self.mZRange = 2
-        self.mZStep = 10
+        self.mMot2Start = 0
+        self.mMot2End = 180
+        self.mMot2Step = 18
         
         self.mAcqTime = 600
         self.mAcqCount = 3
@@ -360,18 +374,18 @@ class DiffControl:
         self.mServerSidePath = ""
         self.mSavePathOK = False
                 
-        # Load from config file values that exist there
-        self.read_config_file()
+        # Load from default config file values that exist there
+        self.read_config_file(DEFAULT_CONFIG_FILE_NAME)
                 
         print('Initializing values')
         self.set_values_to_controls()
 
     
     
-    def read_config_file(self):
+    def read_config_file(self, cfilename):
         # Load from config file values that exist there
         cp = SafeConfigParser()
-        cp.read(CONFIG_FILE_NAME)
+        cp.read(cfilename)
         if cp.has_option('ScanParameters','scantype'):  
             self.mScanType = cp.getint('ScanParameters','scantype')
         if cp.has_option('ScanParameters','mot1movementtype'):  
@@ -405,9 +419,9 @@ class DiffControl:
             self.mLocalSavePath = cp.get('ScanParameters','LocalSavePath')
             self.mServerSidePath,self.mSavePathOK = mountpoint_conversion.get_pilatus_path(self.mLocalSavePath)
             
-    def write_config_file(self):
+    def write_config_file(self, cfilename):
         cp = SafeConfigParser()
-        cp.read(CONFIG_FILE_NAME)
+        cp.read(cfilename)
 
         # Motor 1
         cp.set('ScanParameters','mot1start','%.6f' % self.mMot1Start)
@@ -425,7 +439,7 @@ class DiffControl:
         cp.set('ScanParameters','FileNamePrefix',self.mFileNamePrefix)
         cp.set('ScanParameters','LocalSavePath',self.mLocalSavePath)
         
-        with open(CONFIG_FILE_NAME, 'wb') as configfile:
+        with open(cfilename, 'wb') as configfile:
             cp.write(configfile)
 
 
@@ -451,6 +465,9 @@ class DiffControl:
         self.mScanRunning = True
         # Set the parameters for the detector
 
+        # make the scan start from the beginning
+        self.mScanPositionIndex = 0
+        
         # Start a thread to do the scanning
         self.mScanThread = threading.Thread(target = self.scanThreadEntry)
         self.mScanThread.start()
@@ -469,36 +486,156 @@ class DiffControl:
         
 
         
-    def movementTypeChanged(self,combobox):
-        self.mMovementType = combobox.get_active()
-        self.set_labels_and_hideshow_fields()
+    def on_movement_type_changed(self,combobox):
+        self.mMot1MovementType = combobox.get_active()
+        self.update_view()
 
-    def scanTypeChanged(self,combobox):
+    def on_scan_type_changed(self,combobox):
         print 'scanTypeChanged'
         self.mScanType = combobox.get_active()
         self.update_view()
 
+        # Update the motor mappings
+        self.mMotor1Axis = MOTOR1_MAPPINGS[self.mScanType]
+        self.mMotor2Axis = MOTOR2_MAPPINGS[self.mScanType] 
 
 
 
+    def on_open_settings(self, obj) :
+        chooser = gtk.FileChooserDialog(title='Open a configuration file',action=gtk.FILE_CHOOSER_ACTION_OPEN,
+            buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK)) 
+        resp = chooser.run()
+#        chooser.set_current_folder(self.mLastLoadedConfigFileName)
+        if resp == gtk.RESPONSE_OK:
+            self.mLastLoadedConfigFileName = chooser.get_filename()
+            self.read_config_file(self.mLastLoadedConfigFileName)
+            self.set_values_to_controls()
+            self.update_view()
+            
+        elif resp == gtk.RESPONSE_CANCEL:
+            print 'Closed, no files selected'
+        
+        chooser.destroy()
+        
+    def on_save_settings(self, obj) :
+        chooser = gtk.FileChooserDialog(title='Open a configuration file',action=gtk.FILE_CHOOSER_ACTION_SAVE,
+            buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK)) 
+        chooser.set_current_folder(self.mLastLoadedConfigFileName)
+        resp = chooser.run()
+
+        if resp == gtk.RESPONSE_OK:
+            self.mLastLoadedConfigFileName = chooser.get_filename()
+            self.write_config_file(self.mLastLoadedConfigFileName)
+            self.set_values_to_controls()
+            self.update_view()
+        elif resp == gtk.RESPONSE_CANCEL:
+            print 'Closed, no files selected'
+        chooser.destroy()
+
+        
+    def on_quit_menu_item(self, obj) :
+        print 'on_quit_menu_item'
+        
+        
 
 
 
 
     def scanThreadEntry(self):
+        # Here we have 3 types of activities
+        # 1. set new target positions
+        # 2. acquire new image
+        # 3. wait for movements or images to finish
+        #
+        # We should be able to stop each activity in case mScanRunning is switched
+        # to false (1 second response time is reasonably good)
+        #
         print 'Starting scan thread'
-        while (self.mScanRunning) :
-            # Here we have 3 types of activities
-            # 1. set new target positions
-            # 2. acquire new image
-            # 3. wait for movements or images to finish
-            #
-            # We should be able to stop each activity in case mScanRunning is switched
-            # to false (1 second response time is reasonably good)
-            #
-            print 'Scan thread is running'
-            time.sleep(1)
 
+        # Store the scan parameters locally here
+        m1start = self.mMot1Start
+        m1end = self.mMot1End
+        m1steps = self.mMot1Step
+        m1range = m1end-m1start
+        m1step = self.calc_mot1_step_size()
+
+        m2start = self.mMot2Start
+        m2end = self.mMot2End
+        m2steps = self.mMot2Step
+        m2range = m2end-m2start
+        m2step = self.calc_mot2_step_size()
+        
+        is_continuous = self.mMot1MovementType == 1
+        is_singleaxis = self.mScanType in SINGLE_MOTOR_SCANS
+
+        if is_singleaxis :
+            m2steps = 1
+            m2range = 0
+            m2step = 0
+            
+
+        # Detector parameters
+        acq_time = self.mAcqTime
+        acq_N = self.mAcqCount
+        
+
+        total_points = m1steps * m2steps
+
+        
+        # Move the motors to their start positions
+        # Motor 1
+        self.mMotor1Axis.moveImmediateSynchronous(m1start)
+        if not self.mScanType in SINGLE_MOTOR_SCANS :
+            # And motor 2 if necessary
+            self.mMotor2Axis.moveImmediateSynchronous(m2start)
+            
+                   
+        mot2previndex = 0
+        
+        prevStepFinished = True
+        while (self.mScanRunning) :
+            if prevStepFinished : # query the camera is ready?
+                if self.mScanPositionIndex == total_points:
+                    # all points done
+                    break
+                
+                # Move the motors to new positions
+                mot1index = self.mScanPositionIndex % (m1steps)
+                mot2index = self.mScanPositionIndex / (m1steps)
+                self.mScanPositionIndex += 1
+                
+
+                if mot2previndex != mot2index :
+                    # move motor 2 and motor 1 to start positions
+                    self.mMotor1Axis.moveImmediateSynchronous(m1start)
+
+                    if not is_singleaxis:
+                        self.mMotor2Axis.moveImmediateSynchronous(m2start + mot2index*m2step)
+                    else :
+                        print 'Something not right, trying to move motor 2 in signle axis scan!!!'
+                        
+                    mot2previndex = mot2index
+
+                # set a new position, step by step or continuous
+                if is_continuous :
+                    # Continuous
+                    # Calculate speed
+                    current_speed = m1step / (acq_time*acq_N)
+                    self.motor1Axis.startMoving((mot1index+1)*m1step+mstart,current_speed)    
+                else :
+                    # Step-by-step
+                    self.mMotor1Axis.moveImmediateSynchronous(mot1index*m1step + m1start)
+                    
+
+                # Start the camera for imaging
+                
+            else :
+                # Wait for finishing
+                time.sleep(1)
+
+
+        # Here we need to stop movements and cancel camera recordings
+        
         print 'Scan thread ended'
 
         

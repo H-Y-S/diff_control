@@ -20,7 +20,7 @@ class CameraComm:
         
         # Check connection
         et = get_exp_time()
-        if time < 0:
+        if et < 0:
             # problem with the connection
             isOK = False
             message = "Cannot connect to Pilatus\nCheck that the control computer is on, camserver running, and TVX not running"
