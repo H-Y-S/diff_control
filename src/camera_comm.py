@@ -107,6 +107,12 @@ class CameraComm:
         else:
             return True
 
+
+    # Start the camera exposure with the given imageFileName
+    # Communication protocol looks like this:
+    # exposure kuva0008.tif
+    # 15 OK  Starting 5.000000 second background: 2015-Jun-30T22:21:38.545
+    # 7 OK /data/01/HS/pilatus_testing/kuva0008.tif        
     def expose_image(self,imageFileName):
         # Send command
         self.mTN.write("exposure " + imageFileName)
@@ -118,17 +124,47 @@ class CameraComm:
         # Parse response
         code,resp = resp.split(' ',1)
         ok,resp = resp.split(' ',1)
- 
+
+        # Very short exposure might have finished already
+        expfinished = False
+        try :
+            resp.index('7 OK')
+            expfinished = True
+        except ValueError :
+            expfinished = False
+
+        
         # After image acquisition finishes, there will be another acknowledgement
         # Return true on success false on error
         if (not ok == "OK"):		
-            return False
+            return False,expfinished
         else:
+            return True,expfinished
+
+    # This is a non-blocking way to check if image has been read already 
+    def check_exposure_finished(self) :
+        # Read whatever is available
+        resp = self.mTN.read_eager()
+
+        try :
+            resp.index('7 OK')
             return True
-
-# Seems that 'stop' can be used to stop the exposure (stop DCB)
-# ResetCam seems more appropriate command for stopping the camera
-
+        except ValueError :
+            return False
+                
+        
+    # This stops the camera reading
+    # Example of using stop
+    # exposure kuva0010.tif
+    # 15 OK  Starting 5.000000 second background: 2015-Jun-30T22:22:16.376
+    # ResetCam
+    # 7 ERR /data/01/HS/pilatus_testing/kuva0010.tif15 OK
+    def stop_camera(self) :
+        # ResetCam seems more appropriate command for stopping the camera
+        # Send command
+        self.mTN.write("ResetCam")
+        
+        
 
 
     def get_img_path(self):

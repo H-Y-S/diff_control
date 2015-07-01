@@ -550,6 +550,7 @@ class DiffControl:
         # We should be able to stop each activity in case mScanRunning is switched
         # to false (1 second response time is reasonably good)
         #
+        # scan ending will be tested with number of images taken
         print 'Starting scan thread'
 
         # Store the scan parameters locally here
@@ -574,34 +575,35 @@ class DiffControl:
             m2step = 0
             
 
+        
+            
         # Detector parameters
         acq_time = self.mAcqTime
         acq_N = self.mAcqCount
-        
+        filename_prefix = self.mFilenamePrefix
 
-        total_points = m1steps * m2steps
-
-        
-        # Move the motors to their start positions
-        # Motor 1
-        self.mMotor1Axis.moveImmediateSynchronous(m1start)
-        if not self.mScanType in SINGLE_MOTOR_SCANS :
-            # And motor 2 if necessary
-            self.mMotor2Axis.moveImmediateSynchronous(m2start)
-            
+        total_images = m1steps * m2steps * acq_N
                    
-        mot2previndex = 0
-        
-        prevStepFinished = True
+        mot2previndex = -1        
+        cameraReady = True
+        CC = CameraComm("10.110.11.141",41234) # Connect to the camera       
+        CC.set_exp_time(acq_time)
+        CC.set_exp_period(acq_time + 0.005) # exp period 5 ms longer than exp time is OK
+        CC.set_img_path(self.mServerSidePath)
+        finishMessage = ''
+
+        # Open a log file
+                        
         while (self.mScanRunning) :
-            if prevStepFinished : # query the camera is ready?
-                if self.mScanPositionIndex == total_points:
+            if cameraReady : # query the camera is ready?
+                if self.mScanPositionIndex == total_images:
                     # all points done
+                    finishMessage = 'normal finish'
                     break
                 
-                # Move the motors to new positions
-                mot1index = self.mScanPositionIndex % (m1steps)
-                mot2index = self.mScanPositionIndex / (m1steps)
+                # Move the motors to new positions if necessary
+                mot1index = (self.mScanPositionIndex / acq_N) % (m1steps)
+                mot2index = (self.mScanPositionIndex / acq_N) / (m1steps)
                 self.mScanPositionIndex += 1
                 
 
@@ -611,32 +613,50 @@ class DiffControl:
 
                     if not is_singleaxis:
                         self.mMotor2Axis.moveImmediateSynchronous(m2start + mot2index*m2step)
-                    else :
-                        print 'Something not right, trying to move motor 2 in signle axis scan!!!'
                         
                     mot2previndex = mot2index
+                    if is_continuous :
+                        # This is a new line for motor2, so
+                        # start the motor1 (fast axis) continuous movement
+                        move_time = ack_time*acq_N*m1steps
+                        move_speed = (m1end-m1start) / move_time
+                        self.motor1Axis.startMoving(m1end,move_speed)                                
 
+                    
                 # set a new position, step by step or continuous
-                if is_continuous :
-                    # Continuous
-                    # Calculate speed
-                    current_speed = m1step / (acq_time*acq_N)
-                    self.motor1Axis.startMoving((mot1index+1)*m1step+mstart,current_speed)    
-                else :
-                    # Step-by-step
+                if not is_continuous :
+                    # Step-by-step, move the motor1
                     self.mMotor1Axis.moveImmediateSynchronous(mot1index*m1step + m1start)
                     
 
                 # Start the camera for imaging
-                
+                camOK,camFinished = CC.expose_image(filename_prefix + "%04d" % (self.mScanPositionIndex) + ".tif")
+
+                if not camOK:
+                    print("Exposure does not work") # we should cancel the scan here
+                    finishMessage = 'Exposure does not work'
+                    break
+                else if not camFinished :
+                    cameraReady = False
             else :
                 # Wait for finishing
-                time.sleep(1)
-
+                cameraReady = CC.check_exposure_finished()
+                if not cameraReady:
+                    time.sleep(1)
+                    
 
         # Here we need to stop movements and cancel camera recordings
-        
-        print 'Scan thread ended'
+        CC.stop_camera()
+        self.mMotor1Axis.stopMovement()
+        if no is_singleaxis :
+            self.mMotor2Axis.stopMovement()
+
+        if not self.mScanRunning:
+            finishMessage = 'user cancelled the scan'
+            
+        # Finally close the log file
+                                
+        print 'Scan thread ended : ' + finishMessage
 
         
 # If the program is run directly or passed as an argument to the python
