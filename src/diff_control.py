@@ -559,12 +559,17 @@ class DiffControl:
         m1steps = self.mMot1Step
         m1range = m1end-m1start
         m1step = self.calc_mot1_step_size()
+        m1name = SCAN_TYPE_MOT1_NAMES[self.mScanType]
+        m1unit = SCAN_TYPE_MOT1_UNITS[self.mScanType]
 
+        
         m2start = self.mMot2Start
         m2end = self.mMot2End
         m2steps = self.mMot2Step
         m2range = m2end-m2start
         m2step = self.calc_mot2_step_size()
+        m2name = SCAN_TYPE_MOT2_NAMES[self.mScanType]
+        m2unit = SCAN_TYPE_MOT2_UNITS[self.mScanType]
         
         is_continuous = self.mMot1MovementType == 1
         is_singleaxis = self.mScanType in SINGLE_MOTOR_SCANS
@@ -593,9 +598,26 @@ class DiffControl:
         finishMessage = ''
 
         # Open a log file
-                        
+        try:
+            logFile = open(os.path.join(self.mLocalSavePath,filename_prefix+'_log.txt'),'w') 
+        except IOError :
+            print 'Could not open a log file!'
+
+
         while (self.mScanRunning) :
-            if cameraReady : # query the camera is ready?
+            if cameraReady :
+                # First write into the log file
+                if self.mScanPositionIndex == 0: # write headers
+                    if is_singleaxis:
+                        logFile.write(m1name + " Start [" + m1unit + "]" + " : " + m1name + " End [" + m1unit + "]" + " : " + "ExposureTime" + " : " "ImageFileName")
+                    else:
+                        logFile.write(m1name + " Start [" + m1unit + "]" + " : " + m1name + " End [" + m1unit + "]" + " : " m2name + " Start [" + m2unit + "]" + " : " + m2name + " End [" + m2unit + "]" + " : "+ "ExposureTime" + " : " "ImageFileName")
+                else:
+                    if is_singleaxis:
+                        logFile.write(m1pos_imstart + " : " + m1pos_imend +  " : " + acq_time + " : " lastfilename )
+                    else:
+                        logFile.write(m1pos_imstart + " : " + m1pos_imend " : " + m2pos_imstart+  " : " + m2pos_imend + " : "+ acq_time + " : " lastfilename)
+                
                 if self.mScanPositionIndex == total_images:
                     # all points done
                     finishMessage = 'normal finish'
@@ -629,21 +651,37 @@ class DiffControl:
                     self.mMotor1Axis.moveImmediateSynchronous(mot1index*m1step + m1start)
                     
 
+                # log the starting positions of motors
+                m1pos_imstart = self.mMotor1Axis.getPosition()
+                if not is_singleaxis:
+                    m2pos_imstart = self.mMotor2Axis.getPosition()
+                
                 # Start the camera for imaging
-                camOK,camFinished = CC.expose_image(filename_prefix + "%04d" % (self.mScanPositionIndex) + ".tif")
+                lastfilename = filename_prefix + "%04d" % (self.mScanPositionIndex) + ".tif"
+                camOK,camFinished = CC.expose_image(lastfilename)
 
                 if not camOK:
                     print("Exposure does not work") # we should cancel the scan here
                     finishMessage = 'Exposure does not work'
                     break
-                else if not camFinished :
+                elif not camFinished :
                     cameraReady = False
+                else:
+                    m1pos_imend = self.mMotor1Axis.getPosition()
+                    if not is_singleaxis:
+                        m2pos_imend = self.mMotor2Axis.getPosition()
+                    
+
             else :
                 # Wait for finishing
                 cameraReady = CC.check_exposure_finished()
                 if not cameraReady:
                     time.sleep(1)
-                    
+                else:
+                    m1pos_imend = self.mMotor1Axis.getPosition()
+                    if not is_singleaxis:
+                        m2pos_imend = self.mMotor2Axis.getPosition()
+    
 
         # Here we need to stop movements and cancel camera recordings
         CC.stop_camera()
@@ -655,7 +693,8 @@ class DiffControl:
             finishMessage = 'user cancelled the scan'
             
         # Finally close the log file
-                                
+        logfile.close()
+        
         print 'Scan thread ended : ' + finishMessage
 
         
