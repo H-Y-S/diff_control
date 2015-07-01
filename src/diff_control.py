@@ -496,8 +496,8 @@ class DiffControl:
         self.update_view()
 
         # Update the motor mappings
-        self.mMotor1Axis = MOTOR1_MAPPINGS[self.mScanType]
-        self.mMotor2Axis = MOTOR2_MAPPINGS[self.mScanType] 
+        self.mMotor1Axis = self.MOTOR1_MAPPINGS[self.mScanType]
+        self.mMotor2Axis = self.MOTOR2_MAPPINGS[self.mScanType] 
 
 
 
