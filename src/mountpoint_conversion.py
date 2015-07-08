@@ -6,8 +6,8 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
-PILATUS_MOUNTPOINTS = ["/home/det/p2_det/images/","/home/drobo/"]
-LOCAL_MOUNTPOINTS = [".","Z:"]
+PILATUS_MOUNTPOINTS = ["/home/det/p2_det/images/","/home/drobo/","/data/01/"]
+LOCAL_MOUNTPOINTS = [".","Z:","R:"]
 
 # TODO: This conversion by itself is not enough
 # the mountpoint might not be mounted on pilatus
@@ -19,6 +19,7 @@ LOCAL_MOUNTPOINTS = [".","Z:"]
 # converts a windows path to the linux path using the mountpoint mapping
 def get_pilatus_path(controlPath):
 	# Get the drive
+        print "Converting path: " + controlPath
 	controlPath = ntpath.normpath(controlPath)
 	drv,pth = ntpath.splitdrive(controlPath)
 	
@@ -31,6 +32,7 @@ def get_pilatus_path(controlPath):
 	pil_path = PILATUS_MOUNTPOINTS[ind]+pth
 	pil_path = pil_path.replace("\\","/")
 	pil_path = posixpath.normpath(pil_path)
+        print "Converted path: " + pil_path
 	return pil_path, True
 
 

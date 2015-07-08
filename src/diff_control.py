@@ -6,10 +6,12 @@ import string
 import datetime
 import time
 import threading
+import os
 from ConfigParser import SafeConfigParser
 
 import mountpoint_conversion
 import can_control
+from camera_comm import CameraComm
 from motor_axis import MotorAxis
 
 USE_MOTORS = True
@@ -72,6 +74,14 @@ class DiffControl:
 
     # Constructor, called automatically when an object is created
     def __init__(self):
+
+        if USE_MOTORS :
+            self.mZAxis = MotorAxis(2)
+            self.mYAxis = MotorAxis(1)
+            self.mRotAxis = MotorAxis(3)
+        self.MOTOR1_MAPPINGS = [self.mZAxis, self.mYAxis, self.mRotAxis, self.mZAxis, self.mRotAxis, self.mZAxis]
+        self.MOTOR2_MAPPINGS = [None,None,None,self.mYAxis,self.mZAxis,self.mRotAxis]
+
         self.builder = gtk.Builder()
         self.builder.add_from_file("diff_control.glade")
         self.init_values() # init values before connecting the fields
@@ -100,13 +110,7 @@ class DiffControl:
 #        gtk.gdk.threads_init() # Needed for pygtk and threads to work and able to touch GUI
         gobject.threads_init() # Alternatively, threads do not touch GUI
 
-        if USE_MOTORS :
-            self.mZAxis = MotorAxis(2)
-            self.mYAxis = MotorAxis(1)
-            self.mRotAxis = MotorAxis(3)
 
-        self.MOTOR1_MAPPINGS = [self.mZAxis, self.mYAxis, self.mRotAxis, self.mZAxis, self.mRotAxis, self.mZAxis]
-        self.MOTOR2_MAPPINGS = [None,None,None,self.mYAxis,self.mZAxis,self.mRotAxis]
 
 
     # start the event-loop (and end of control here)
@@ -379,7 +383,7 @@ class DiffControl:
                 
         print('Initializing values')
         self.set_values_to_controls()
-
+        self.update_motor_mappings()
     
     
     def read_config_file(self, cfilename):
@@ -449,7 +453,6 @@ class DiffControl:
             buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK)) 
         chooser.set_action(gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER)
         resp = chooser.run()
-        chooser.destroy()
         if resp == gtk.RESPONSE_OK:
             self.mLocalSavePath = chooser.get_filename()
             self.mServerSidePath,self.mSavePathOK = mountpoint_conversion.get_pilatus_path(self.mLocalSavePath)
@@ -460,6 +463,7 @@ class DiffControl:
         elif resp == gtk.RESPONSE_CANCEL:
             print 'Closed, no files selected'
 			
+        chooser.destroy()
 
     def start_scan(self, widget = None, data = None):
         self.mScanRunning = True
@@ -494,7 +498,10 @@ class DiffControl:
         print 'scanTypeChanged'
         self.mScanType = combobox.get_active()
         self.update_view()
+        self.update_motor_mappings()
 
+
+    def update_motor_mappings(self):
         # Update the motor mappings
         self.mMotor1Axis = self.MOTOR1_MAPPINGS[self.mScanType]
         self.mMotor2Axis = self.MOTOR2_MAPPINGS[self.mScanType] 
@@ -585,7 +592,7 @@ class DiffControl:
         # Detector parameters
         acq_time = self.mAcqTime
         acq_N = self.mAcqCount
-        filename_prefix = self.mFilenamePrefix
+        filename_prefix = self.mFileNamePrefix
 
         total_images = m1steps * m2steps * acq_N
                    
@@ -611,12 +618,12 @@ class DiffControl:
                     if is_singleaxis:
                         logFile.write(m1name + " Start [" + m1unit + "]" + " : " + m1name + " End [" + m1unit + "]" + " : " + "ExposureTime" + " : " "ImageFileName")
                     else:
-                        logFile.write(m1name + " Start [" + m1unit + "]" + " : " + m1name + " End [" + m1unit + "]" + " : " m2name + " Start [" + m2unit + "]" + " : " + m2name + " End [" + m2unit + "]" + " : "+ "ExposureTime" + " : " "ImageFileName")
+                        logFile.write(m1name + " Start [" + m1unit + "]" + " : " + m1name + " End [" + m1unit + "]" + " : " + m2name + " Start [" + m2unit + "]" + " : " + m2name + " End [" + m2unit + "]" + " : "+ "ExposureTime" + " : " "ImageFileName")
                 else:
                     if is_singleaxis:
-                        logFile.write(m1pos_imstart + " : " + m1pos_imend +  " : " + acq_time + " : " lastfilename )
+                        logFile.write(m1pos_imstart + " : " + m1pos_imend +  " : " + acq_time + " : " + lastfilename )
                     else:
-                        logFile.write(m1pos_imstart + " : " + m1pos_imend " : " + m2pos_imstart+  " : " + m2pos_imend + " : "+ acq_time + " : " lastfilename)
+                        logFile.write(m1pos_imstart + " : " + m1pos_imend + " : " + m2pos_imstart+  " : " + m2pos_imend + " : "+ acq_time + " : " + lastfilename)
                 
                 if self.mScanPositionIndex == total_images:
                     # all points done
@@ -686,7 +693,7 @@ class DiffControl:
         # Here we need to stop movements and cancel camera recordings
         CC.stop_camera()
         self.mMotor1Axis.stopMovement()
-        if no is_singleaxis :
+        if not is_singleaxis :
             self.mMotor2Axis.stopMovement()
 
         if not self.mScanRunning:
