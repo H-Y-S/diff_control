@@ -1,0 +1,2 @@
+z-axis received: motor encoder count error (is it switching directions too fast?)
+It seems that after this reference is not found,and the motor moves to wrong position?

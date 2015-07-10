@@ -79,6 +79,8 @@ class DiffControl:
             self.mZAxis = MotorAxis(2)
             self.mYAxis = MotorAxis(1)
             self.mRotAxis = MotorAxis(3)
+            can_control.enableMotors()
+
         self.MOTOR1_MAPPINGS = [self.mZAxis, self.mYAxis, self.mRotAxis, self.mZAxis, self.mRotAxis, self.mZAxis]
         self.MOTOR2_MAPPINGS = [None,None,None,self.mYAxis,self.mZAxis,self.mRotAxis]
 
@@ -621,9 +623,9 @@ class DiffControl:
                         logFile.write(m1name + " Start [" + m1unit + "]" + " : " + m1name + " End [" + m1unit + "]" + " : " + m2name + " Start [" + m2unit + "]" + " : " + m2name + " End [" + m2unit + "]" + " : "+ "ExposureTime" + " : " "ImageFileName")
                 else:
                     if is_singleaxis:
-                        logFile.write(m1pos_imstart + " : " + m1pos_imend +  " : " + acq_time + " : " + lastfilename )
+                        logFile.write("%0.4f" % m1pos_imstart + " : " + "%0.4f" % m1pos_imend +  " : " + "%0.4f" % acq_time + " : " + lastfilename )
                     else:
-                        logFile.write(m1pos_imstart + " : " + m1pos_imend + " : " + m2pos_imstart+  " : " + m2pos_imend + " : "+ acq_time + " : " + lastfilename)
+                        logFile.write("%0.4f" % m1pos_imstart + " : " + "%0.4f" % m1pos_imend + " : " + "%0.4f" % m2pos_imstart+  " : " + "%0.4f" % m2pos_imend + " : "+ "%0.4f" % acq_time + " : " + lastfilename)
                 
                 if self.mScanPositionIndex == total_images:
                     # all points done
