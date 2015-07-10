@@ -612,20 +612,23 @@ class DiffControl:
         except IOError :
             print 'Could not open a log file!'
 
-
+        SINGLE_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : ExposureTime [ms] : ImageFileName"
+        DUAL_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : %s Start [%s] : %s End [%s] : ExposureTime [ms] : ImageFileName"
+        SINGLE_AXIS_LOG_DATA_STRING = "%0.4f : %0.4f : %0.4f : %s"
+        DUAL_AXIS_LOG_DATA_STRING = "%0.4f : %0.4f : %0.4f : %0.4f: %0.4f : %s"
         while (self.mScanRunning) :
             if cameraReady :
                 # First write into the log file
                 if self.mScanPositionIndex == 0: # write headers
                     if is_singleaxis:
-                        logFile.write(m1name + " Start [" + m1unit + "]" + " : " + m1name + " End [" + m1unit + "]" + " : " + "ExposureTime" + " : " "ImageFileName")
+                        logFile.write(SINGLE_AXIS_LOG_HEADER_STRING % (m1name,m1unit,m1name,m1unit))
                     else:
-                        logFile.write(m1name + " Start [" + m1unit + "]" + " : " + m1name + " End [" + m1unit + "]" + " : " + m2name + " Start [" + m2unit + "]" + " : " + m2name + " End [" + m2unit + "]" + " : "+ "ExposureTime" + " : " "ImageFileName")
+                        logFile.write(DUAL_AXIS_LOG_HEADER_STRING % (m1name,m1unit,m1name,m1unit,m2name,m2unit,m2name,m2unit))
                 else:
                     if is_singleaxis:
-                        logFile.write("%0.4f" % m1pos_imstart + " : " + "%0.4f" % m1pos_imend +  " : " + "%0.4f" % acq_time + " : " + lastfilename )
+                        logFile.write(SINGLE_AXIS_LOG_DATA_STRING % (m1pos_imstart,m1pos_imend,acq_time,lastfilename))
                     else:
-                        logFile.write("%0.4f" % m1pos_imstart + " : " + "%0.4f" % m1pos_imend + " : " + "%0.4f" % m2pos_imstart+  " : " + "%0.4f" % m2pos_imend + " : "+ "%0.4f" % acq_time + " : " + lastfilename)
+                        logFile.write(DUAL_AXIS_LOG_DATA_STRING % (m1pos_imstart,m1pos_imend,m2pos_start,m2pos_end,acq_time,lastfilename))
                 
                 if self.mScanPositionIndex == total_images:
                     # all points done
