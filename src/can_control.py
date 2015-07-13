@@ -464,8 +464,8 @@ def stopMotorMovement(nodeAddress):
             print "stopping axis: " + str(nodeAddress)
             print "{0:08X}".format(getCANStatusWord(nodeAddress))
             sendCANMsg(cobid,command);
-            finishMovement(nodeAddress)
             canMSGs,canMSGsraw = waitCANResponse(nodeAddress,"40","60")
+            finishMovement(nodeAddress)
 
             return True
         else:

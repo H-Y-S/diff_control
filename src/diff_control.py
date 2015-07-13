@@ -565,7 +565,7 @@ class DiffControl:
         # Store the scan parameters locally here
         m1start = self.mMot1Start
         m1end = self.mMot1End
-        m1steps = self.mMot1Step
+        m1steps = int(self.mMot1Step)
         m1range = m1end-m1start
         m1step = self.calc_mot1_step_size()
         m1name = SCAN_TYPE_MOT1_NAMES[self.mScanType]
@@ -574,7 +574,7 @@ class DiffControl:
         
         m2start = self.mMot2Start
         m2end = self.mMot2End
-        m2steps = self.mMot2Step
+        m2steps = int(self.mMot2Step)
         m2range = m2end-m2start
         m2step = self.calc_mot2_step_size()
         m2name = SCAN_TYPE_MOT2_NAMES[self.mScanType]
@@ -593,7 +593,7 @@ class DiffControl:
             
         # Detector parameters
         acq_time = self.mAcqTime
-        acq_N = self.mAcqCount
+        acq_N = int(self.mAcqCount)
         filename_prefix = self.mFileNamePrefix
 
         total_images = m1steps * m2steps * acq_N
@@ -612,36 +612,41 @@ class DiffControl:
         except IOError :
             print 'Could not open a log file!'
 
-        SINGLE_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : ExposureTime [ms] : ImageFileName"
-        DUAL_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : %s Start [%s] : %s End [%s] : ExposureTime [ms] : ImageFileName"
-        SINGLE_AXIS_LOG_DATA_STRING = "%0.4f : %0.4f : %0.4f : %s"
-        DUAL_AXIS_LOG_DATA_STRING = "%0.4f : %0.4f : %0.4f : %0.4f: %0.4f : %s"
+        SINGLE_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : ExposureTime [ms] : ImageFileName \n"
+        DUAL_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : %s Start [%s] : %s End [%s] : ExposureTime [ms] : ImageFileName \n"
+        SINGLE_AXIS_LOG_DATA_STRING = "%0.4f : %0.4f : %0.4f : %s \n"
+        DUAL_AXIS_LOG_DATA_STRING = "%0.4f : %0.4f : %0.4f : %0.4f: %0.4f : %s \n"
         while (self.mScanRunning) :
             if cameraReady :
                 # First write into the log file
-                if self.mScanPositionIndex == 0: # write headers
+                if self.mScanPositionIndex == 0: # write headers in the first loop
                     if is_singleaxis:
                         logFile.write(SINGLE_AXIS_LOG_HEADER_STRING % (m1name,m1unit,m1name,m1unit))
                     else:
                         logFile.write(DUAL_AXIS_LOG_HEADER_STRING % (m1name,m1unit,m1name,m1unit,m2name,m2unit,m2name,m2unit))
-                else:
+                else: # write the data after image has been finished
                     if is_singleaxis:
                         logFile.write(SINGLE_AXIS_LOG_DATA_STRING % (m1pos_imstart,m1pos_imend,acq_time,lastfilename))
                     else:
                         logFile.write(DUAL_AXIS_LOG_DATA_STRING % (m1pos_imstart,m1pos_imend,m2pos_start,m2pos_end,acq_time,lastfilename))
                 
+
+                # If no more points need to be done, break from the loop
                 if self.mScanPositionIndex == total_images:
                     # all points done
                     finishMessage = 'normal finish'
                     break
-                
+
+                                
                 # Move the motors to new positions if necessary
-                mot1index = (self.mScanPositionIndex / acq_N) % (m1steps)
-                mot2index = (self.mScanPositionIndex / acq_N) / (m1steps)
+                mot1index = int((self.mScanPositionIndex / acq_N)) % (m1steps)
+                mot2index = int((self.mScanPositionIndex / acq_N)) / (m1steps)
+                next_image_number = self.mScanPositionIndex
                 self.mScanPositionIndex += 1
                 
 
                 if mot2previndex != mot2index :
+                    print 'switching to new motor 2 position %f != %f' % (mot2previndex,mot2index) 
                     # move motor 2 and motor 1 to start positions
                     self.mMotor1Axis.moveImmediateSynchronous(m1start)
 
@@ -652,9 +657,9 @@ class DiffControl:
                     if is_continuous :
                         # This is a new line for motor2, so
                         # start the motor1 (fast axis) continuous movement
-                        move_time = ack_time*acq_N*m1steps
+                        move_time = acq_time*acq_N*m1steps
                         move_speed = (m1end-m1start) / move_time
-                        self.motor1Axis.startMoving(m1end,move_speed)                                
+                        self.mMotor1Axis.startMoving(m1end,move_speed)                                
 
                     
                 # set a new position, step by step or continuous
@@ -669,7 +674,7 @@ class DiffControl:
                     m2pos_imstart = self.mMotor2Axis.getPosition()
                 
                 # Start the camera for imaging
-                lastfilename = filename_prefix + "%04d" % (self.mScanPositionIndex) + ".tif"
+                lastfilename = filename_prefix + "%04d" % (next_image_number) + ".tif"
                 camOK,camFinished = CC.expose_image(lastfilename)
 
                 if not camOK:
@@ -696,18 +701,22 @@ class DiffControl:
     
 
         # Here we need to stop movements and cancel camera recordings
+        print 'Stopping camera'
         CC.stop_camera()
+        print 'Stopping motor 1 movement'
         self.mMotor1Axis.stopMovement()
         if not is_singleaxis :
+            print 'Stopping motor 2 movement'
             self.mMotor2Axis.stopMovement()
 
         if not self.mScanRunning:
             finishMessage = 'user cancelled the scan'
             
         # Finally close the log file
-        logfile.close()
+        logFile.close()
         
         print 'Scan thread ended : ' + finishMessage
+        ## TODO, enable the user interface on a normal scan finish
 
         
 # If the program is run directly or passed as an argument to the python
