@@ -1,0 +1,69 @@
+Where to make changes for new banks or new detectors, e.g. for slsdet:
+(note that files are indvidual for each detector directory)
+
+...tvx/slsdet/include/slsdet.h
+
+...tvx/camera/camserver/slsdetcam/include
+
+...tvx/camera/camserver/slsdetcam/rpc/rpc_server/fifo.c
+
+You may need to change:
+NROW_CHIP 78  -- no. of rows of pixels per chip
+NCOL_CHIP 44  -- no. of columns of pixels per chip
+NCHIPS 16     -- no. of chips on a sensor
+
+NROW_MOD 157  -- no. of rows of pixels on a sensor (=module), including double pixels
+NCOL_MOD 366  -- no. of columns of pixles on a sensor (=module), including double pixels
+NMOD_BANK 3   -- no. of modules in a bank
+NCOL_BTW_MOD 11  -- no. of (non-existent) pixels between modules
+
+NROW_BTW_BANK 3  -- no. of rows of (non-existant) pixels between banks
+NBANKS 6      -- no. of banks in the detector
+
+Note that Dyconex vs. Gandi layout must be selected in tscanner.c
+
+Changes may also be needed in signal definition files and glossary files.
+
+--------------------------------------------------
+Where to make changes for 6x2 pixel format:
+
+Where to make changes for 18-bit counter?  Note the issue of 2
+extra bits, which are truncated.
+
+
+...tvx/sls8x2/include/sls8x2.h
+#define NROW_CHIP 6
+#define NCOL_CHIP 1
+#define NCHIPS 2
+#define NROW_MOD 6
+#define NCOL_MOD 2
+
+#define NBITS 18
+#define NSTATES 262144
+#define fbBIT 10
+
+also, select Gandi or Dyconex layout in tscanner.c
+
+
+...tvx/camera/camserver/sls8x2/include/detsys.h
+#define NROW_CHIP 6
+#define NCOL_CHIP 1
+#define NCHIPS 2
+#define NROW_MOD 6
+#define NCOL_MOD 2
+
+#define NBITS 18
+#define NSTATES 262144
+#define fbBIT 10
+
+
+...tvx/camera/camserver/sls8x2/rpc/rpc_server/fifo.c
+#define COLS 1
+#define ROWS 6
+#define NROWS_MOD 6
+#define NCOLS_MOD 2
+
+#define NBITS 18
+#define NSTATES 262144
+#define fbBit 10
+

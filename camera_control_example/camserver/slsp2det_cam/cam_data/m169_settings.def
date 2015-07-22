@@ -1,0 +1,77 @@
+# m169_settings.def
+# Created 26 Apr 07 EFE
+
+# model 100K
+# s/n ???
+# module 169
+
+# ultra-high gain not available
+
+# high gain settings
+settings = highG
+vrf = -0.1
+slope = -0.000085
+tau = 300e-9
+tempcoeff = 0.1
+e = 5900
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/T5p9_vrf_m0p2_20070307/
+e = 8000
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/m169_T8p0_vrf_m0p2_20070410/
+e = 9900
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/T9p9_vrf_m0p2_20070307/
+
+# mid (standard) gain settings
+settings = midG
+vrf = -0.2
+slope = -0.000090
+tau = 194e-9
+tempcoeff = 0.2
+e = 5900
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/T5p9_vrf_m0p2_20070307/
+e = 8000
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/m169_T8p0_vrf_m0p2_20070410/
+e = 9900
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/T9p9_vrf_m0p2_20070307/
+e = 11900
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/m169_T11p9_vrf_m0p2_20070410/
+
+# low gain settings
+settings = lowG
+vrf = -0.3
+slope = -0.000095
+tau = 129e-9
+tempcoeff = 0.3
+e = 5900
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/m169_T5p9_vrf_m0p3_20070411/
+e = 9900
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/m169_T9p9_vrf_m0p3_20070307/
+e = 11900
+ffield =
+bpmap = 
+dir = /home/det/p2_1mod/config/calibration/m169_T11p9_vrf_m0p3_20070307/
+e = 17500
+bpmap = 
+ffield =
+dir = /home/det/p2_1mod/config/calibration/m169_T17p5_vrf_m0p3_20070307/
+e = 22200
+bpmap = 
+ffield =
+dir = /home/det/p2_1mod/config/calibration/m169_T22p2_vrf_m0p3_20070411/

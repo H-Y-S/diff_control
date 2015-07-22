@@ -1,0 +1,25 @@
+EFE 29 Dec 06
+- gslib.c: introduce parameter dt into gs_set_t0
+
+EFE 4 Oct 05
+- gslib.c:621 - do not use 'atexit(gs_terminate)'
+
+EFE 29 Sep 05
+- gslib.c:1159 - change syntax to keep compiler happy
+
+EFE 20 Sep 05
+- start version gst-2.2
+- gslib.c: in dma_setups - inform gstar card of exact transfer size after
+   mmap() allocation
+
+EFE 10 May 05
+- start version gst-2.1
+
+EFE 1 Dec 04
+- change Makefile to eliminate -lXIE
+- change Makefile to untar into own directory
+- call it version 2.03
+
+EFE 19 Nov 04
+- start version 2.02
+- eliminate the all upper case argument

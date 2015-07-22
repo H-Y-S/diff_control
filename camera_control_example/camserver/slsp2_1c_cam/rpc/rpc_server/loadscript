@@ -1,0 +1,8 @@
+ld <rpc_server/ioc_rpc_xdr.o
+ld <rpc_server/vpg.o
+ld <rpc_server/fifo.o
+ld <rpc_server/rpcroutines.o
+ld <rpc_server/ioc_rpc_svc.o
+fifoini
+vpgini
+rpcmain

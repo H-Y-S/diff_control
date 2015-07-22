@@ -1,0 +1,30 @@
+#! /bin/bash
+
+# invoke gdb on a running camserver process
+
+# Camserver forks processes, so this code only attaches to the first
+# which may not be what you want.  But, works fine for standalone operation.
+
+#v will usually have the 'grep camserver' process as well
+v=`ps a|grep camserver`
+#echo $v
+
+if [ "`echo $v|cut -d' ' -f 4`" = 'camserver' ]
+then 
+	var=`echo $v|cut -d' ' -f 1`
+	echo attaching gdb to process ${var}
+	exec gdb -s camserver -c $var ;
+elif [ "`echo $v|cut -d' ' -f 5`" = 'camserver' ]
+then 
+	var=`echo $v|cut -d' ' -f 1`
+	echo attaching gdb to process ${var}
+	exec gdb -s camserver -c $var ;
+# if you have "nedit camserver.c" running, then camserver may be in the 2nd field
+elif [ "`echo $v|cut -d' ' -f 11`" = 'camserver' ]
+then 
+	var=`echo $v|cut -d' ' -f 7`
+	echo attaching gdb to process ${var}
+	exec gdb -s camserver -c $var ;
+else
+	echo camserver process not found -- start camserver first
+fi

@@ -1,0 +1,7 @@
+# PILATUS 6M Module Voltage Offsets, 2006 Mar 20
+# Offset is added to every request to set the given signal
+#
+#  S/N  Signal  Offset
+	28	VADJ	0.03
+	22	VADJ	-0.01
+	17	VADJ	0.02

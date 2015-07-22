@@ -1,0 +1,41 @@
+# sls8x2/include/camera_casedefs.txt
+# optionally hard-code part or all of the case values in camserver
+# this file is used by mkheader
+
+# the name of this file is the base name of the program (e.g., camserver)
+#      with "_casedefs.txt" appended
+# this file is located in the camera-specific include directory
+
+# some rules apply:
+# the cases must occur in the same order as in your tvxcampkg.c
+# the comparison is case sensitive
+# the numeric values you assign must be monotonically increasing
+# the lowest value you assign should be larger than the largest automatic
+#      assignment - say, 200
+# there can be gaps in the numeric sequence reserved for future expansion
+# unassigned cases occuring after your assigned cases will be automatically
+#      assigned sequentially by the compiler after your last assigned case; 
+#      hence you need only assign the first case to obtain your own 
+#      private sequence
+# the numbers can be decimal or hex
+# formatting can be with tabs or spaces
+# cases listed here, but not in tvxcampkg.c, are ignored, but remain available
+#      for later use.
+
+# the easiest way to get your initial list is to copy out of camserver.h
+
+
+		SeT			= 100,
+		Reset		= 101,
+		ProG		= 102,
+		Show		= 103,
+		Load		= 110,
+		Save		= 111,
+		Filename,
+		DataPath,
+		AutoExec,
+		LoadPattern,
+		RuN,
+		Set_clk_divideR,
+		Pc_reseT,
+		Pc_set,

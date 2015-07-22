@@ -1,0 +1,55 @@
+iocHost
+img_mode
+n_images
+
+
+
+
+tvxpkg.c - remove set, etc.
+
+FIXME:
+progi2c/i2c_util.c
+util/interface.c
+tvxpkg.c
+
+
+rdImgB &  rdImgM functionality - also docs
+
+Pwait functionality
+
+SetNImages & procedure - get overlap of expose & reading
+
+in dcblib.c:~336 - we should look for kill key
+we should also process commands so that a typed stop can work
+
+How do we do a plain readout?
+
+selpix x y   -- implement calpix
+fillpix val  -- becomes rbd
+
+trim stuff
+
+fillpixels - only operates on selected chips??
+
+fillpix & calibrate - can these be done on modules in parallel?
+
+
+
+============================================
+
+Don't forget tvx/slsp2det/changesToPropagate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

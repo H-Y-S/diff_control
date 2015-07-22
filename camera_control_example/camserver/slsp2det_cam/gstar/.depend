@@ -1,0 +1,14 @@
+dcblib.o: dcblib.c \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/debug.h \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/dcb.h \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/detsys.h \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/gslib.h \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/dcblib.h \
+  include/gsdc.h \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/time_log.h \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/RELEASE.inc
+time_log.o: time_log.c \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/gslib.h \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/dcblib.h \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/detsys.h \
+  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/time_log.h

@@ -37,10 +37,11 @@ class CameraComm:
 
     def get_exp_time(self):
         # Send command
-        self.mTN.write("exptime")
+        self.mTN.write("exptime\r\n")
 
         # Read response
         resp = self.mTN.read_some()
+        print "Resp is:::" + resp + ":::"
 
         # Parse response
         time = -1
@@ -55,10 +56,11 @@ class CameraComm:
 
     def set_exp_time(self,newExpTime):
         # Send command
-        self.mTN.write("exptime " + str(newExpTime))
+        self.mTN.write("exptime " + str(newExpTime) + "\r\n")
 
         # Read response
         resp = self.mTN.read_some()
+        print "Resp is:::" + resp + ":::"
 
         # Parse response
         code,resp = resp.split(' ',1)
@@ -73,10 +75,11 @@ class CameraComm:
             
     def get_exp_period(self):
         # Send command
-        self.mTN.write("expperiod")
+        self.mTN.write("expperiod\r\n")
 
         # Read response
         resp = self.mTN.read_some()
+        print "Resp is:::" + resp + ":::"
 
         # Parse response
         time = -1
@@ -92,10 +95,11 @@ class CameraComm:
 
     def set_exp_period(self,newExpPeriod):
         # Send command
-        self.mTN.write("expperiod " + str(newExpPeriod))
+        self.mTN.write("expperiod " + str(newExpPeriod) + "\r\n")
 
         # Read response
         resp = self.mTN.read_some()
+        print "Resp is:::" + resp + ":::"
 
         # Parse response
         code,resp = resp.split(' ',1)
@@ -115,11 +119,14 @@ class CameraComm:
     # 7 OK /data/01/HS/pilatus_testing/kuva0008.tif        
     def expose_image(self,imageFileName):
         # Send command
-        self.mTN.write("exposure " + imageFileName)
+        camera_command = "exposure " + imageFileName
+        print "exposing with command: " + camera_command
+        self.mTN.write(camera_command + "\r\n")
 
         # The first response is to acknowledge the acquisition start
         # Read response
         resp = self.mTN.read_some()
+        print "Resp is:::" + resp + ":::"
 
         # Parse response
         code,resp = resp.split(' ',1)
@@ -145,6 +152,7 @@ class CameraComm:
     def check_exposure_finished(self) :
         # Read whatever is available
         resp = self.mTN.read_eager()
+        print "Resp is:::" + resp + ":::"
 
         try :
             resp.index('7 OK')
@@ -159,20 +167,22 @@ class CameraComm:
     # 15 OK  Starting 5.000000 second background: 2015-Jun-30T22:22:16.376
     # ResetCam
     # 7 ERR /data/01/HS/pilatus_testing/kuva0010.tif15 OK
-    def stop_camera(self) :
-        # ResetCam seems more appropriate command for stopping the camera
+    def stop_camera(self):
+        # ResetCam seems the more appropriate command for stopping the camera
         # Send command
-        self.mTN.write("ResetCam")
+        self.mTN.write("ResetCam\r\n")
         
         
 
 
     def get_img_path(self):
          # Send command
-        self.mTN.write("imgpath")
+        self.mTN.write("imgpath\r\n")
 
         # Read response
         resp = self.mTN.read_some()
+        print "Resp is:::" + resp + ":::"
+
         code,resp = resp.split(' ',1)
         ok,resp = resp.split(' ',1)
         
@@ -185,10 +195,13 @@ class CameraComm:
     # camera control computer
     def set_img_path(self,newpath):
         # Send command
-        self.mTN.write("imgpath " + newpath)
+        print "setting image save path as: " + newpath
+        self.mTN.write("imgpath " + newpath + "\r\n")
         
         # Read response
         resp = self.mTN.read_some()
+        print "Resp is:::" + resp + ":::"
+
         code,resp = resp.split(' ',1)
         ok,resp = resp.split(' ',1)
 
@@ -199,7 +212,9 @@ class CameraComm:
 
 
     def close_connection(self):
-        self.mTN.read_very_eager()
+        resp = self.mTN.read_very_eager()
+        print "Resp is:::" + resp + ":::"
+
         self.mTN.close()
 
 

@@ -1,0 +1,8 @@
+# startup commands for camserver
+
+DataPath /home/det/p2_1mod/images
+dbglvl 1
+
+
+
+

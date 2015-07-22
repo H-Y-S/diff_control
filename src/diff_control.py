@@ -608,12 +608,12 @@ class DiffControl:
 
         # Open a log file
         try:
-            logFile = open(os.path.join(self.mLocalSavePath,filename_prefix+'_log.txt'),'w') 
+            logFile = open(os.path.join(self.mLocalSavePath,filename_prefix+'log.txt'),'w') 
         except IOError :
             print 'Could not open a log file!'
 
-        SINGLE_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : ExposureTime [ms] : ImageFileName \n"
-        DUAL_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : %s Start [%s] : %s End [%s] : ExposureTime [ms] : ImageFileName \n"
+        SINGLE_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : ExposureTime [s] : ImageFileName \n"
+        DUAL_AXIS_LOG_HEADER_STRING = "%s Start [%s] : %s End [%s] : %s Start [%s] : %s End [%s] : ExposureTime [s] : ImageFileName \n"
         SINGLE_AXIS_LOG_DATA_STRING = "%0.4f : %0.4f : %0.4f : %s \n"
         DUAL_AXIS_LOG_DATA_STRING = "%0.4f : %0.4f : %0.4f : %0.4f: %0.4f : %s \n"
         while (self.mScanRunning) :
@@ -628,7 +628,7 @@ class DiffControl:
                     if is_singleaxis:
                         logFile.write(SINGLE_AXIS_LOG_DATA_STRING % (m1pos_imstart,m1pos_imend,acq_time,lastfilename))
                     else:
-                        logFile.write(DUAL_AXIS_LOG_DATA_STRING % (m1pos_imstart,m1pos_imend,m2pos_start,m2pos_end,acq_time,lastfilename))
+                        logFile.write(DUAL_AXIS_LOG_DATA_STRING % (m1pos_imstart,m1pos_imend,m2pos_imstart,m2pos_imend,acq_time,lastfilename))
                 
 
                 # If no more points need to be done, break from the loop

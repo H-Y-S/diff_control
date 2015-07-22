@@ -1,0 +1,25 @@
+# list of settings to be logged to treport.txt
+# for the p2 modules
+VTRM
+VCMP0
+VCMP1
+VCMP2
+VCMP3
+VCMP4
+VCMP5
+VCMP6
+VCMP7
+VCMP8
+VCMP9
+VCMP10
+VCMP11
+VCMP12
+VCMP13
+VCMP14
+VCMP15
+VCCA
+VRF
+VRFS
+VCAL
+VDEL
+VADJ

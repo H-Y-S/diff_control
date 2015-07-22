@@ -1,0 +1,939 @@
+Notes:
+
+When configuring a new definitions file ('.def'), or making other major
+changes, it is generally a good idea to invoke camserver manually in a large
+window to see all the error messages.  To do this, cd to the camserver 
+directory, and type:
+		./camserver path_to_resource_file_you_are_testing
+Then, after all is well, you can switch to using 'runtvx' (which opens only a
+small xterm for camserver).
+
+If you're in real trouble, turn on the commented code line ~954 in camserver.c
+to allow a chance to start GDB before initializations.
+
+To change signal definitions:
+1.  Make up a new signal definition file, such as sls_05_16_1.def.  Note that
+     every signal must be defined, though "NOT_USED" is an acceptable
+	 definition.
+2.  Change camera.def to point to this new definition file.
+3.  If you need new signal names, they must be entered in signals.c and 
+     pix_detector.h.  
+
+
+----- COMMANDS
+
+Commands are not case sensitive.  Commands can be abbreviated, so long as the
+abbreviation is unambiguous.  Thus, set_clk_divider can be abbreviate as
+'set_c', quit by just 'q'.
+
+Numbers may be given as decimals, or as hex values by using the '0x' prefix.
+
+Camserver commands in the slsp2det package:
+
+~keystart=SeT
+SeT - set DAC voltage or state of CHSEL (I2C protocol).  Usage:
+
+		set signal_name value [filename]
+		set chsel_name [value] [filename]
+
+	1) signal_name or chsel_name is one of the names defined in signals.c
+	2) value is in volts, defined in the definition file (e.g. sls_05_16_1.def)
+	3) value is optional for chsel
+	4) if filename is given, the pattern is also written to a file
+	5) if auotexec is 'on', the pattern is run to set the voltage
+	6) without a signal name, selected_band and selected_mod are set
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Reset
+Reset - reset state of CHSEL (I2C protocol).  Usage:
+
+		reset chsel_name <filename>
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend		
+
+~keystart=ProG
+ProG - set DAC voltage or CHSEL to hexadecimal value (I2C protocol).  Usage:
+
+		prog signal_name hex_value <filename>
+		prog chsel_name hex_value <filename>
+
+	1) 0 <= hex_value <= 0xff
+	2) only values 0 and 1 are meaningful for chsel.
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Show
+Show - show current setting of DAC or CHSEL (I2C protocol).  Usage:
+
+		show signal_name
+		show chsel_name
+
+Socket connection return code: 1
+Socket connection return text: current setting
+~keyend
+
+~keystart=Load
+Load - load I2C configuration from a file.  Usage:
+
+		load filename
+
+	1) if path is not specified, cam_data_path is used
+	2) each line contains a single set command (see above)
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Save
+Save - save I2C configuration to a file.  Usage:
+
+		save filename
+
+	1) if path is not specified, cam_data_path is used
+	2) each line will contain a single set command (see above)
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=ImgonlY
+ImgonlY - read detector data as image file.  Usage:
+
+		imgonly [image_name]
+
+	1) if image name is not given, the next automatic name is used
+
+Socket connection return code: 15
+Socket connection return text: name of image
+~keyend
+
+~keystart=Cpix
+Cpix - enter calpix mode using internal calibrate pulses.  Usage:
+
+		cpix [x y]
+
+	1) default is (x, y) = (0, 0) (detector coordinates)
+	2) exit this mode with Stop or ExpEnd
+Cf. cpix_x
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Cpix_x
+Cpix_x - enter the calpix mode for x-rays.  Usage:
+
+		cpix_x [x y]
+
+	1) default is (x, y) = (0, 0) (detector coordinates)
+	2) exit this mode with Stop or ExpEnd
+Cf. cpix
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Stop
+Stop - stop exposure or calpix.  Usage:
+
+		stop
+
+Socket connection return code: 
+Socket connection return text: 
+~keyend
+
+~keystart=Fillpix
+Fillpix - fill pixels of selected modules with a value.  Usage:
+		fillpix [value [bank [module]]]
+	where val is the value to be used.
+	1) Fills pixels by the parallel load method
+	2) Only affects selected chips
+	3) Default value is 0xfffff, which sets pixel content to 0
+	4) Defaults: bank = 15, module = 7 (i.e., all modules)
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=SFillpix
+SFillpix - fill pixels of selected modules with a value.  Usage:
+
+		sfillpix [value [bank [module]]]
+
+	where val is the value to be used.
+	1) Slow fills pixel by pixel - not in parallel
+	2) Only affects selected chips
+	3) Default value is 0xfffff, which sets pixel content to 0
+	4) Defaults: bank = 15, module = 7 (i.e., all modules)
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Calibrate
+Calibrate - send N calibrates to each pixel of the detector.  Usage:
+
+		calibrate [N [bank [module]]]
+
+	where N is the number of calibrates to send to selected modules
+	1) Default N = 100
+	2) Defaults: bank = 15, module = 7 (i.e., all modules)
+	3) This is a slow operation and there is a time limit for completion.
+		Thus the maximum number of pulses per pixel is ~130.
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=rdImgB
+rdImgB - read an image from data in the BCBs - not defined for p2
+
+Socket connection return code: 
+Socket connection return text: 
+~keyend
+
+~keystart=rdImgM
+rdImgM - read an image from data in the modules - not defined for p2
+
+Socket connection return code: 
+Socket connection return text: 
+~keyend
+
+~keystart=Trim
+Trim - set or read-back the trim value of a pixel.  Usage:
+
+		trim x y value  -- set trim of pixel (x, y) to value
+		trim x y        -- report current trim setting if pixel (x, y)
+		trim -1         -- reset selections
+
+	1) On readback, detector coordinates are assumed if no chip is selected
+	2) To set a value, exactly 1 chip must be selected
+	3) readback is software only; no physical read of a chip is possible
+	4) 0 <= value <= 63; 0 is all off (1's), 63 is all on (0's)
+
+Socket connection return code: 1
+Socket connection return text: none or error message
+~keyend
+
+~keystart=Trim_all
+Trim_all - set trim in all pixles to a given value.  Usage;
+
+		trim_all value
+
+Socket connection return code: 1
+Socket connection return text: none
+~keyend
+
+~keystart=SetTrims
+SetTrims - set all trims from the internal array.  Usage:
+
+		settrims
+
+Socket connection return code: 1
+Socket connection return text: none
+~keyend
+
+~keystart=TrimFromFile
+TrimFromFile - set all trims from a file of values.  Usage:
+
+		trimfromfile filename
+
+	1) The file contains 1 line per pixel with the trim command syntax:
+		trim 0 0 3
+		trim 1 0 7  -- etc.
+	2) The file need not be complete; missing pixels are not reset
+	3) Comments preceed by '#' are accepted.
+	4) If a path is not specified, the current cam_data_path is used.
+	5) Path may be '~'
+	6) This only loads the array; use SetTrims to write the array to the chip
+
+Socket connection return code: 1
+Socket connection return text: none
+~keyend
+
+~keystart=TrimFromBinFile
+TrimFromBinFile - load trims from a binary file.  Usage:
+
+		trimfrombinfile filename
+
+	1) binary file format as created by the SetThreshold command, which 
+		calls set_calibration_interpolate()
+	2) If a path is not specified, the current cam_data_path is used.
+	3) Path may be '~'
+	4) This only loads the array; use SetTrims to write the array to the chip
+
+Socket connection return code: 1
+Socket connection return text: none
+~keyend
+
+~keystart=LogImgFile
+LogImgFile - log the parameters of the last image to parameters file.  Usage:
+
+		logimgfile
+
+	1) Records parameters to 'params.txt' in the same directory as last image
+	2) Parameters are: vcal, vtrm, vcmp, trim & img_name
+
+Socket connection return code: 15
+Socket connection return text: path name
+~keyend
+
+~keystart=Read_signals
+Read_signals - (re)read the i2c signal definitions.  Usage:
+
+		read_signals filename
+		
+	1) (Re)reads the i2c configuration file, e.g., 'p2det.def'.  The
+		original file used at startup is declared in, e.g., 'camera.def'.
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=LogSettings
+LogSettings - report selected i2c settings to treport.txt.  Usage:
+
+		logsettings directory_path
+
+	1) Used after tscan_ini, this reads selected settings from the internal
+		table and appends values to treport.txt in the given directory.
+	2) This is no substitute for an actual measurement.
+
+Socket connection return code: 15
+Socket connection return text: path name
+~keyend
+
+~keystart=ImgMode
+ImgMode - select the imaging mode.  Usage:
+
+		imgmode xrays  -or-  imgmode pulses
+
+	1) In sls8x2 module, selects whether to split counts at chip edges into
+		the double and quadruple pixels of the sensor.  If xrays selected,
+		counts are split; feature is off for pulses.
+	2) Arguments can be abbreviated as 'x' or 'p', or '1' and '0' respecitvely
+	3) In the x-ray mode, the xor table returns 0 for the (impossible)
+		input of 0; in the pulse mode, returns 0xffff.
+
+Socket connection return code: 15
+Socket connection return text: image mode (text)
+~keyend
+
+~keystart=Gpibsend_volt
+Gpibsend_volt - send typed command to GPIB voltmeter
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Gpibread_volt
+Gpibread_volt - get output from GPIB voltmeter
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Gpibsend_scope
+Gpibsend_scope - send typed command to GPIB oscilloscope
+
+	1) The GPIB command may be extended with the optional (x,y) address of 
+		where in an image to place the value readout.
+	Normal syntax:
+		gpibread_scope "PArameter_STatistics? CUST, AVG"
+	Extended syntax:
+		gpibread_scope "PArameter_STatistics? CUST, AVG!",[c],[r]
+	Note that the key separator, '!', is within the quotes.
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Gpibread_scope
+Gpibread_scope - get output from GPIB oscilloscope
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Scopeimg
+Scopeimg - write the image formed by extended 'gpibread_scope' to a file.
+	Usage:
+			scopeimg "filename"
+
+	1) If filename does not contain a path, 'cam_image_path' is prepended.
+	2) More generally, this command writes the current content of the array
+		'theImage' to a file.
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=NImages
+NImages - set or query the number of images for fine-slice mode.  Usage:
+		nimages [n]
+
+	1) 0 & 1 have the same effect - single image mode
+	2) If no value is given, the current value is printed
+	3) n < 2^32.
+
+Socket connection return code: 15
+Socket connection return text: "Exposures per frame set to: nn"
+~keyend
+
+~keystart=NExpFrame
+NExpFrame - set or query the number of exposures to accumulate per frame.
+Usage:
+		nexpframe [n]
+
+	1) 0 & 1 have the same effect - single image per frame
+	2) If no value is given, the current value is printed
+	3) A value >1 is a waste of x-rays except when using external enable
+		or external multi-trigger to synchronously capture an event.
+	4) If nexpframe>1, the reported 'measured exposure time" applies
+	   to the last exposure only
+	5) n < 2^32.
+
+Socket connection return code: 15
+Socket connection return text: "Exposures per frame set to: nn"
+~keyend
+
+~keystart=NFrameImg
+NFrameImg - control or query the number of frames to be summed to an image
+Usage:
+		nframeimg [n]
+
+	1) n frames (readouts) are summed in software into a single image.
+		The frames are individually rate-corrected.  The resulting dynamic
+		range is up to 31 bits.
+	2) This setting is ignored for image mode P (pulses).
+	3) n < 2^32.
+
+Socket connection return code: 15
+Socket connection return text: "Frames per image set to: nn"
+~keyend
+
+~keystart=ExpPeriod
+ExpPeriod - set the exposure period for high speed automatic exposure mode. 
+Usage:
+		expperiod [t]
+
+	1) 0 is the default, indicating the mode is off
+	2) t is in seconds
+	3) if t is not given, the current setting is echoed
+	4) t must be longer than exposure time by the readout time plus
+		a margin, typically 3.65 ms total for the 50 MHz design.
+	5) the frame time is ExpPeriod*(NExpFrame-1) + ExpTime
+	6) t < 60 days.
+
+Socket connection return code: 15
+Socket connection return text: "Exposure period set to: n.n sec"
+~keyend
+
+~keystart=ExtEnable
+ExtEnable - make 'NImages' exposure frames using an external trigger.
+Usage:
+		extenable file_base_name
+
+	1) Set NImages, NExpFrame, ExpTime & ExpPeriod in advance.  ExpTime
+		and ExpPeriod can be approximate if the sequence is short.
+	2) Setting ExpPeriod < 0.05 suppresses printing filenames -
+		useful for high speed
+	3) The time until the first enable must be < DMA timeout limit
+		(~16 s or ~8 s as shown during initialization).
+	4) Set ExpTime to the total enable-time per frame so that the
+		proper rate correction can be calculated.
+		See also Tau.
+
+Do 'help ExpNaming' to see the exposure file naming convention
+
+Socket connection return code: 
+    15 at the start of the exposure or exposure series
+    7 after completion.
+Socket connection return text: 
+    at start: starting xxx second background <date & time>  -or-
+              starting xxx second exposure <date & time>
+    at end: full path name of last image
+~keyend
+
+~keystart=ExtTrigger
+ExtTrigger - make 'NImages' exposure frames using an external trigger.  Usage:
+		exttrigger file_base_name
+
+	1) Set NImages, NExpFrame, ExpTime & ExpPeriod in advance.
+	2) Set delay in advance (if used); default is 0
+	3) The time until the first trigger must be < DMA timeout limit
+		(~16 s or ~8 s as shown during initialization).
+	4) Setting ExpPeriod < 0.05 suppresses printing filenames -
+		useful for high speed
+
+Do 'help ExpNaming' to see the exposure file naming convention
+
+Socket connection return code: 
+    15 at the start of the exposure or exposure series
+    7 after completion.
+Socket connection return text: 
+    at start: starting xxx second background <date & time>  -or-
+              starting xxx second exposure <date & time>
+    at end: full path name of last image
+~keyend
+
+~keystart=ExtMTrigger
+ExtMTrigger - make 'NImages' exposure frames using multiple external triggers.
+  Usage:
+		extmtrigger file_base_name
+
+	1) Set NImages, NExpFrame, ExpTime & ExpPeriod in advance.
+	2) Set delay in advance (if used); default is 0
+	3) Images are trigged by the external trigger, but use the internal
+		timer for the exposure time.
+	4) The time until the first trigger must be < DMA timeout limit
+		(~16 s or ~8 s as shown during initialization).
+
+Do 'help ExpNaming' to see the exposure file naming convention
+
+Socket connection return code: 
+    15 at the start of the exposure or exposure series
+    7 after completion.
+Socket connection return text: 
+    at start: starting xxx second background <date & time>  -or-
+              starting xxx second exposure <date & time>
+    at end: full path name of last image
+~keyend
+
+~keystart=Delay
+Delay - set or query delay from the external trigger until start of exposure.
+Usage:
+		delay [t [dcb]]
+
+	1) 0 is the default
+	2) t is in seconds
+	3) if t is not given, the current setting is echoed
+	4) t < 64 sec for the 67 MHz DCB
+	5) Delay is reset to 0 for ordinary exposures and external enable
+	6) In a multi-dcb detector, the dcb's can be individually delayed.
+	7) If dcb is not given, t is applied to all dcb's.
+	8) Delays of successive DCBs are cumulative; e.g., the sequence
+			delay 0.0 0
+			delay 0.1 1
+			delay 0.1 2
+		results in DCB 2 starting 0.2 s after the trigger, not 0.1 s
+	9) ExpPeriod > ExpTime + max_delay + readout_time,
+		where max_delay = 0.2 s in the above example and
+		readout_time = 0.0028 s (April 2009)
+
+Socket connection return code: 15
+Socket connection return text: "Delay time set to: n.n sec", -or-
+	"DCB 0 delay time set to: 0.000000 sec.", etc. for all DCBs
+~keyend
+
+~keystart=DebTime
+DebTime - set or read the contact debounce time for external enable mode
+Usaage:
+		debtime [t]
+
+	1) 0 is the default
+	2) t is in seconds
+	3) if t is not given, the current setting is echoed
+	4) this is useful when the external enable is not clean - e.g., derived
+	    from a mechanical switch
+	5) the external enable pulse must be longer than this value
+	6) DebTime < 85 sec.
+
+Socket connection return code: 15
+Socket connection return text: "Debounce time set to: n.n sec"
+~keyend
+
+~keystart=DataSection
+DataSection - write a DataSection comment to all params.txt files.
+Usage:
+		datasection any_text
+
+	1) Uses path of last image to find params.txt
+	2) Identifies data block for tvx
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=VDelta
+VDelta - apply a delta voltage to a signal(s) in all modules.
+Usage:
+		vdelta signal_base_name delta
+
+	1) Uses PILATUS II signal definitions
+	2) base name is, e.g, VTRM or VCMP
+	3) e.g. VCMP12 is not an error, but all values are changed
+	4) delta is limited to +/- 1.0 volt
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=Tau
+Tau - control in-line count rate correction.
+Usage:
+		tau [value_in_s]
+
+	1) If no argument is given, the current value is printed
+	2) tau is in units of s; e.g., 'tau 125e-9'
+	3) tau = 0.0 turns off in-line rate correction
+	4) As of 26 Mar 09, Philipp Kraft found for the P2 modules:
+		vrf = -0.3   tau = 110.0 ns  (fast setting - low gain)
+		vrf = -0.2   tau = 199.1 ns  (standard setting - mid gain)
+		vrf = -0.15  tau = 383.8 ns  (slow setting - high gain)
+		vrf = -0.1   tau = ????? ns  (v. slow setting - ultra-high gain)
+		These values shift significantly with the relative threshold setting
+	5) Rate correction accuracy will suffer if the instantaneous rate
+		varies significantly during an exposure - e.g. as a Bragg spot
+		passes thru the Ewald sphere.  Better to use shorter exposures
+		and sum them.  See also NFrameImg.
+	6) At very high counting rates (>1e6/s) tau varies with storage ring
+		fill pattern
+	7) Rate correction is invalid when enable is synchronized to the
+		bunch structure of a storage ring - better to leave it off.
+
+Socket connection return code: 15
+Socket connection return text: 
+	none if there was no change
+	"Turn off rate correction" - if argument was 0
+	"Set up rate correction: tau = n.n s" - if a new tau specified
+~keyend
+
+~keystart=THread
+THread - read one of the temperature and humidity sensors.
+Usage:
+		thread [channel]
+
+	1) channels are numbered 1-6 on the first DCB, 7-12 on the second
+	2) if channel is not specified, # 0 is addressed
+	3) if no sensor is connected, -99 is printed
+
+Socket connection return code: 215
+Socket connection return text: temperature and humidity
+~keyend
+
+~keystart=SensorHtr
+SensorHtr - control the Sensirion sensor heater.  
+Usage:
+		sensorhtr [channel] [on]
+
+	1) channels are numbered 1-6 on the first DCB, 7-12 on the second
+	2) if channel is not specified, # 0 is addressed
+	3) if 'on' or 'ON' is not specified, the heater is turned off
+
+Socket connection return code: 15
+Socket connection return text: state of sensor heater
+~keyend
+
+~keystart=SetLimTH
+SetLimTH - query or set temp / humidity alarm limits.
+Usage:
+		setlimth [chan [Tlo Thi Hlo Hhi]]
+
+	1) channels are numbered 1-6 on the first DCB, 7-12 on the second
+	2) query is directed to all active channels
+	3) defaults are: Tlo=18, Thi=35, Hlo=0, Hhi=70; these are used in
+		a set operation if not given in the command
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=SetSDelay
+SetSDelay - software setting of sampling delay on dcb/bcb.
+Usage:
+		setsdelay n
+
+	where 0 <= n <= 0xff.  Use 'rbd' to test result.
+	   On a single module system, this setting is normally set by the rotary
+	switches on the DCB.  On multi-module systems, only the software setting
+	is possible.
+
+Socket connection return code: 15
+Socket connection return text: "Sample delay set to: xx"
+~keyend
+
+~keystart=BitMode
+BitMode - set the readout dynamic range.
+Usage
+		bitmode [n]
+
+	where n = 4, 8 or 20
+	1) default is 20
+	2) n = 4 or 8 result in 8-bit images with increased speed
+	3) if n is omitted, the current value is printed
+	4) not currently implemented - probably will not work
+
+Socket connection return code: 15
+Socket connection return text: "Readout dynamic range is: nn bits"
+~keyend
+
+~keystart=Dcb_init
+Dcb_init - attempt full (re)initialize of the DCB
+Usage:
+		dcb_init
+
+Socket connection return code: 15
+Socket connection return text: status message
+~keyend
+
+~keystart=GapFill
+GapFill - query or set the value to be used in pixels between modules
+Usage:
+		gapfill [n]
+
+	where n is 0 or -1.
+	1) if n is omitted, the current value is printed
+	2) only applies to multi-module detectors
+
+Socket connection return code: 15
+Socket connection return text: "Detector gap-fill is: nn"
+~keyend
+
+~keystart=DiscardMultiIm
+DiscardMultiIm - discard multiple images
+Usage:
+		discardmultiim [n]
+
+	where n=0 to turn off this feature, or n!=0 to turn on
+	1) if n is omitted, the current state is printed
+	2) n may also be the word 'yes' or 'no' or 'y' or 'n
+
+Socket connection return code: 15
+Socket connection return text: status
+~keyend
+
+~keystart=DacOffset
+DacOffset - query or set the state of dac offset compensation
+Usage: 
+		dacoffset [n]
+
+	where n=0 to turn off this feature, or n!=0 to turn on
+	1) if n is omitted, the current state is printed
+	2) n can be 0 or !0 or 'on' or 'off'
+	3) the default state is off; turn on for trim calculations
+
+Socket connection return code: 15
+Socket connection return text: status
+~keyend
+
+~keystart=MXsettings
+MXsettings - query or set crystallography parameters
+Usage:
+		mxsettings [parm_name [value] [parm_name value] ...]
+
+	Parameter names:
+		Wavelength
+		Energy_range
+		Detector_distance
+		Detector_Voffset
+		Beam_xy
+		Flux
+		Filter_transmission
+		Start_angle
+		Angle_increment
+		Detector_2theta
+		Polarization
+		Alpha
+		Kappa
+		Phi
+		Chi
+		Oscillation_axis
+		N_oscillations
+		
+	1) The parameters 'Beam_xy' and 'Energy_range' accept 2 values.
+	2) These paramters are included in CBF and TIFF image headers as comments.
+	3) More than 1 parameter may be specified in each command and they
+		can be in any order.
+	4) With no parameters, print the entire current list
+	5) With a parameter name only, print just that parameter's value
+	6) All parameters may be abbreviated with the shortest unambiguous string
+	7) In an automatic sequence, Start_angle is automatically incremented by
+		'Angle_increment' after each recorded image.
+	8) The parameter 'Oscillation_axis' is text up to 18 chars, e.g. "X, CW"
+
+Socket connection return code: 15
+Socket connection return text: settings
+~keyend
+
+~keystart=CalibFile
+CalibFile - show or change the detector calibration file
+Usage:
+		calibfile [path]
+
+	1) if path not given, the current calibration file is printed
+	2) if path is given, it will be interpreted relative to the current
+		cam_data_path, unless an absolute path is given.
+
+Socket connection return code: 15
+Socket connection return text: pathname of file
+~keyend
+
+~keystart=SetThreshold
+SetThreshold - set gain (energy range) and threshold energy
+Usage:
+		setthreshold [[gain] threshold]
+
+	1) if parameters are omitted, the current settings are shown
+	2) gain is 'uhighG', 'highG', 'midG' (standard) or 'lowG'
+	3) if gain is omitted, the previous setting is retained
+	4) threshold is in eV
+	5) this command builds a script in "/tmp/setthreshold.dat" and 
+		then loads it.  The data for building the script are read, e.g.,
+		from p2_1mod/config/cam_data/mxxx_calibration.def.
+
+Socket connection return code: 15
+Socket connection return text: pathname of file
+~keyend
+
+~keystart=LdBadPixMap
+LdBadPixMap - load a mask image giving bad pixels to be flagged
+Usage:
+		ldbadpixmap [filename]
+
+	1) if filename is not given, the current setting is shown
+	2) if filename is '0' or "off", the pixel flagging function is turned off
+	3) filename must be a full pathname
+	4) The maximum number of bad pixels and the flag value are in detsys.h;
+		typically bad pixels are flagged as -2.
+
+Socket connection return code: 15
+Socket connection return text: none or pathname
+~keyend
+
+~keystart=LdFlatField
+LdFlatField - load or query flat-field correction file
+Usage:
+		ldflatfield [filename]
+	1) if filename is not given, the current setting is shown
+	2) if filename is '0' or "off", the flat field function is turned off
+	3) filename must be a full pathname
+	4) filename must be a 32-bit floating-point TIFF image
+	5) the image is pixel-wise multiplied by the correction file
+
+Socket connection return code: 15
+Socket connection return text: none or pathname
+~keyend
+
+~keystart=SetAckInt
+SetAckInt - set or query the interval for acknowledgements over the socket
+Usage:
+		setackint [N]
+	1) if N is omitted, the current value is shown
+	2) N=0 (default) - only the last exposure of a series is acknowledged.
+	   The initiating command is always acknowledged, so for 1 or more
+	   images, there is an acknowldgement before the start and at the end
+	   of a series.
+	3) N=n - acknowledge every nth image.  There are some restrictions at
+	   high frame rate: n cannot be too low.
+
+Socket connection return code: 15
+Socket connection return text: none or current setting
+~keyend
+
+~keystart=SetEnergy
+SetEnergy - set or query the simplified gain and threshold setting
+  Usage:  setenergy [energy in eV]
+    1) If energy is omitted, the last setting is shown
+	2) If energy is out of range, a default is set and a warning issued.
+	3) The requested energy is used to calculate appropriate gain and
+		threshhold settings for the detector.  It is not necessarily
+		the same as the beam energy.  Cf. MXsettings:Energy_range
+	4) For finer control over detector settings, use SetThreshold
+
+Socket connection return code: 15
+Socket connection return text: none or current setting
+~keyend
+
+~keystart=ScanDAC
+ScanDAC - make an exposure series while scanning a DAC or trims
+  Usage:
+  		scandac dacname increment nexp filename
+	1) exposure time already set
+	2) dacname can be VCMP, VTRM, or TRIM (not case sensitive)
+	3) starting voltage for the DAC already set
+	4) increment is  delta-V to be applied to the dac after each exposure
+	5) nexp is the number of exposures to make
+	6) filename is the full pathname for the first image of the series,
+		normally designated by [autoname] in tvx.  To avoid ambiguity,
+		pass the desired extension. e.g., '[autoname].cbf', although '.tif'
+		is the default
+	7) if a datasection in params.txt is open, parameters are written there
+	8) all of the specified dacs in the detector are treated in parallel
+	9) NImages is reset to 1
+
+Socket connection return code: 15
+Socket connection return text: none
+~keyend
+
+~keystart=ExpNaming
+Exposure file naming for SLS detectors.
+
+Exposure commands take a filename or file basename as their argument.  For
+single images, the filename is used as typed; if a recognized image file
+format extension is present (.tif, .edf, .cbf), the file will be created
+in that format.  Otherwise, a raw image is produced.
+
+For multiple exposure series (NImages > 1), the typed name is used as a 
+basename; again, the extension, if given, is used to set the image format.
+The following examples show the interpretation of the basename.
+
+basename			files produced
+test6.tif			test6_00000.tif,      test6_00001.tif, ...
+test6_.tif			test6_00000.tif,      test6_00001.tif, ...
+test6_000.tif		test6_000.tif,        test6_001.tif, ...
+test6_014.tif		test6_014.tif,        test6_015.tif, ...
+test6_0008.tif		test6_0008.tif,       test6_0009.tif, ...
+test6_2_0035.tif	test6_2_0035.tif,     test6_2_0036.tif, ...
+test6_014B.tif		test6_014B_00001.tif, test6_014B_00001.tif, ...
+
+I.e., the numbers following the last '_' are taken as a format template, and
+as a start value.  The minimum format is 3; there is no maximum; the default
+is 5.  The format is also constrained by the requested number of images.
+~keyend
+
+~keystart=Cam_start
+Cam_start - direct interface to camera_start.  Usage:
+		cam_start filebasename [time]
+
+Socket connection return code: none
+Socket connection return text: N/A
+~keyend
+
+~keystart=EndOfHelpText  **** THIS INDICATES THE END OF THE HELP FILE TEXT. 
+                TEXT AFTER THIS WILL NOT BE READ! ****
+
+
+
+Commands for the R-Axis4 controller at SPring8 bl38b1:
+Cm_input:
+Cm_output:
+Cm_shutter:
+Cm_getmotval:
+Cm_putmotval:
+Cm_check_motion:
+Cm_moveto:
+Cm_manual:
+Cm_home:
+Cm_dc:
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+Commands that are easy to mix up:
+
+Read_setup - reread, e.g., camera.def - the entire camera definition file
+			(this will also reread sls05_mcb_16.def)
+	e.g.:  read_setup /home/det/sls05_mcb/config/cam_data/camera.def
+
+Read_signals - reread, e.g., sls05_mcb_16.def - the ppg configuration file
+	e.g.:  read_signals /home/det/sls05_mcb/config/cam_data/sls05_mcb_16.def
+
+LdCmndFile - reread, e.g., sls05mcb.set - or any file of commands
+	e.g.:  ldcmndfile /home/det/sls05_mcb/config/cam_data/sls05mcb.set

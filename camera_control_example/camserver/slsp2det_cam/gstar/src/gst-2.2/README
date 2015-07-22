@@ -1,0 +1,149 @@
+Guide to the PMC Gigastar card interface library and test program
+
+Eric F. Eikenberry
+SLS Detector Development Group
+Paul Scherrer Institute
+May, 2005
+
+Copyright Eric F. Eikenberry, January 2005.  All rights reserved.
+
+This code is openly distributed under the GNU Public License (GPL).
+
+
+Files:
+	util/gslib.c  -- an interface library for use by applications
+	include/gslib.h  -- prototypes for the interface functions
+	include/gsdc.h   -- (a link) needed by applications, shared with the driver
+
+	gst.c - a test program
+	misc/debug.c - a debugger
+	misc/mkheader.c - program to make the header for the test program
+	
+	include/gst.h - the dynamic header for gst.c
+
+See also the driver, gs_drv-1.6.
+
+
+Introduction
+-------------
+The PMC-GigaSTaR card has been developed by the PSI Electronics Group to permit high speed communication between an instrument and a computer over a simple 2-wire serial line (or optical fiber).
+
+The driver supports 1 or more PMC Gigastar cards in a single computer.
+
+Linux kernel version 2.6.6 or higher is required, preferably with Andrew Morton's low latency patches.
+
+Separate DMA buffers are used for reading and writing from/to the cards; these do not need to be the same size.
+
+DMA reading from the cards (RX operations) or writing to the cards (TX operations) may be double buffered - one buffer can be filling from the data source while the other buffer is being emptied.
+
+
+
+Low-level interface
+--------------------
+The driver implements a pseudo-filesystem, called gsfs, which operates similarly to /proc.  After loading the driver, the gsfs filesystem is mounted on a convenient mount point (be default 'gsdev'), and several devide files appear (time, BAR0, BAR1, read0, read1, wirte0, write1).  See the driver documentation.
+
+Use open(2) to open the various devices to obtain fd's (file descriptors)
+
+Use read(2) and write(2) to communicate witht the devices.
+
+Use mmap(2) to create dma buffers of specified size.
+
+Use munmap(2) to return dma buffers to the system.
+
+Use BAR0 to set interrupt and get error codes.
+
+The use of these functions is illustrated in the library, util/gslib.c.
+
+
+
+Library interface
+-------------------
+The library functions are documented in util/gslib.c
+
+
+
+The test program, gst.c
+-------------------
+The test program, gsst.c, is a command line-driven program based on commando ( Eric F. Eikenberry, c 1999-2005), a simple command line driver program.  Test procedures are built in for the driver, and illustrations of use of each of the library functions is demonstrated.
+
+New tests (commands) are very easy to implement - make a new case statement like:
+
+case NewTest:
+	(code here)
+	break;
+
+After recompilation, the command 'NewTest' will appear in the menu.  The system is not case-sensitive for the operator, but the programmer should include one (or more) upper case letters in the case statement.  
+
+The command may be typed with arbitrary text arguments following the command; the argument list is available to the program as 'ptr' for the new code to interpret.
+
+The commands implemented are:
+
+T0 - set time 0 for both timers
+Rdt - read elapsed time
+Timestamp - print current time using  the TSC time
+TimeT - measure times for timer calls (faster in single user mode)
+status - print status for specified card
+reset - reset specified card
+Start - start specified card
+Bbar0r - block BAR0 read - specify card, offset, nwords
+FullStat - verbose status of specified card
+FIrqstat - verbose irq status of specified card
+Pio1 - programmed i/o transmit and receive test
+Test18 - interrupt test using dma
+Test19 - double buffered interrupt test using dma
+Test20 - interleaved double buffered interrupt test using dma
+Test21 - continuous loop data source for test22 & test23
+Test22 - trigger a remote souce & write modules of data
+Test23 - trigger a remote souce & write full images using fork()
+Test80 - send a dword & receive a response while logging errors
+Test90 - receive dword, and retransmit while logging errors
+Exit - exit the program
+Quit - same as exit
+Menu - type this menu
+Dbglvl - set or query the debugger level
+
+
+
+The debugger, debug.c
+-------------------
+A convenient debugger is included.  By programming, e.g., 
+
+DBG(8, "User argument: %s\n", ptr);
+
+the system will write this message to the debug file when execution passes this point in the program.  The syntax is: DBG(priority, FORMAT [ARGUMENT]...) where priority is an integer from 1 to 9, and FORMAT [ARGUMENT]... is as in printf().  Whether a message is logged depends on the priority: if the priority is <= the current debug level, the message is logged.  The debug level is stored internally as 'dbglvl', and can be set or queried by the command 'dbglvl' from the keyboard.
+
+
+Notes
+--------------------
+
+mmap'ping more than DMA_N_PAGES_MAX pages results in a segmentation fault
+
+kernel 2.6.6 or higher only
+
+The library keeps fd's open for the entire process.  The first file op will be slowed by page faults (see the nopage() method in the driver); subsequent file ops - if fd stays open - have no overhead.  The dma buffers are directly mapped from kernel address space; data are not copied from the kernel to the user.
+
+Initialization of gslib:
+1) probe # of cards
+2) open fd's for each function
+3) reset each card
+4) set burst sizes
+5) schedule a cleanup at exit
+
+The driver does not evaluate the source of an interrupt - this is for the application.
+
+Two different blocking accesses (e.g. read and write) cannot wait on the same interrupt - the 2nd one will return with EFAULT.
+
+Each card has its own interrupt - they may be used separately.
+
+In the case of multiple cards, to use the interrupts independently one requires multiple threads or multiple processes - calls to read or write block the process until completion of the operation, so a single process cannot wait on both cards.  This has not been tested.
+
+The ioctl(2) method is defined for interrupt enable/disable, but not recommended.
+
+offset's & count's in all library operations are in bytes, typical of system calls; the PMC-GigaSTaR works with 32-bit dwords.
+
+you can make an entry in /etc/rc.d/rc.local to load the module automatically during system boot.
+
+Change the default path in gslib.c (line 424) to something useful.
+
+Change GS_MAX_DEVICES (gsdc.h) as needed.
+

@@ -1,0 +1,56 @@
+# slsp2det_cam/include/camera_casedefs.txt
+# optionally hard-code part or all of the case values in camserver
+# this file is used by mkheader
+
+# the name of this file is the base name of the program (e.g., camserver)
+#      with "_casedefs.txt" appended
+# this file is located in the camera-specific include directory
+
+# some rules apply:
+# the cases must occur in the same order as in your tvxcampkg.c
+# the comparison is case sensitive
+# the numeric values you assign must be monotonically increasing
+# the lowest value you assign should be larger than the largest automatic
+#      assignment - say, 200
+# there can be gaps in the numeric sequence reserved for future expansion
+# unassigned cases occuring after your assigned cases will be automatically
+#      assigned sequentially by the compiler after your last assigned case; 
+#      hence you need only assign the first case to obtain your own 
+#      private sequence
+# the numbers can be decimal or hex
+# formatting can be with tabs or spaces
+# cases listed here, but not in tvxcampkg.c, are ignored, but remain available
+#      for later use.
+
+# the easiest way to get your initial list is to copy out of camserver.h
+
+
+          CamCmd =   1,
+        CamSetup =   2,
+         CamWait =   3,
+        DataPath =   4,
+              Df =   5,
+          ExpEnd =   6,
+        Exposure =   7,
+         ExpTime =   8,
+    HeaderString =   9,
+         ImgPath =  10,
+      LdCmndFile =  11,
+      Read_setup =  12,
+               K =  13,
+        ResetCam =  14,
+            Send =  15,
+         ShowPID =  16,
+   ShutterEnable =  17,
+       TelemetrY =  18,
+            ExiT =  19,
+            QuiT =  20,
+            MenU =  21,
+          Status =  22,
+             SeT = 200,
+           Reset = 201,
+            ProG = 202,
+            Show = 203,
+            Load = 210,
+            Save = 211,
+          THread = 215,

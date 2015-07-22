@@ -1,0 +1,104 @@
+~/.tvxrc:
+# tvxrc - a configuration file for tvx
+# make a copy of this as ~/.tvxrc, and customize as desired
+# note that "$HOME" may be specified in any path
+
+
+image_path  "../../images/"
+graph_path  "../../graphs/"
+help_file  "./docs/help.tvx"
+auto_name_prefix, "../../images/image_"
+# path seen by the camera, generally an nfs mount
+expose_path "../../../../images"
+
+definitions_startup_file "../../default.gl"
+
+# turn on logging by uncommenting this
+# logfile_name "./test/test/tvxlog"
+
+# put the correct ip for your camera server here
+camera_ip_address "129.129.76.202"
+# camera_ip_address nul    # don't look for a camera
+camera_port_number 41234
+camera_wide 1024
+camera_high 1024
+camera_bpp 16
+# extra time before expecting an exposure to be finished
+expose_overhead 2
+
+max_image_memory 40			# in MBytes
+hold_time_for_objects 10	# in seconds
+DefaultImageFileType TIFF
+# DefaultImageFileType SMV
+DefaultGraphFileType GRAF
+# DefaultGraphFileType DAT
+
+Default_min 0					# parameters for display
+Default_max 65535
+Default_scale 5
+defaultDispColor GRAYS
+# defaultDispColor COLOR
+butterflyDefaultDirection 0		# radians
+butterflyDefaultSplay 0			# radians
+butterflyDefaultSeparation 30	# pixels
+annulusDefaultBigRadius 50		# pixels
+annulusDefaultSmallRadius 30	# pixels
+lambda 1.54						# Angstrom
+detector_distance 100.0			# mm
+pixel_size 0.095				# mm
+resolution_outer 4.2			# Angstrom
+resolution_inner 6.0			# Angstrom
+
+
+dbglvl = 3
+
+
+~/.camrc
+# camrc - a configuration file for camserver.c
+
+# NB -  camera paths are relative to the directory where camserver is launched
+# If you 'run' in ./tvx, camserver is launched from './tvx/camera/camserver'
+
+camstat_path "../../test/test/camstat"	# camera status reporting system
+
+cam_data_path = "../../../../cam_data"
+default_image_path = "../../../../images"
+
+cam_definition_file = "./camera.def"	# hardware specific configuration of camera
+
+cam_startup_file = "../../../../mcb/sls04/vgnd34.set"
+
+# host ip not needed because camserver discovers who it is
+camera_port_number 41234
+
+ioc_host = "ioc062"			# ioc crate running the rpc code
+
+dbglvl = 8
+
+# below should be parameters specific for the server program
+# camera specific parameters should be in "camera.def"
+
+
+~/vxtest/VPG517/mcb1/default.gl
+~/vxtest/VPG517/mcb1/cam_data/default.set
+~/vxtest/VPG517/mcb1/graphs/
+~/vxtest/VPG517/mcb1/images/
+~/vxtest/VPG517/mcb1/ppg/tvx-7.1.07/default.gl
+~/vxtest/VPG517/mcb1/ppg/tvx-7.1.07/sls42.pkg
+
+~/vxtest/VPG517/mcb1/ppg/tvx-7.1.07/camera/camserver/camera.def:
+# camera.def - a camera definition file for tvx_demo_camera
+
+# these parameters are loaded during initialization
+# A different file may be loaded from the command line during operation
+
+camera_name = "tvx_demo_camera"
+camera_wide = 1024
+camera_high = 1024
+camera_bpp = 16
+
+~/vxtest/VPG517/mcb1/ppg/tvx-7.1.07/camera/camserver/include/pix_detector.h
+~/vxtest/VPG517/mcb1/ppg/tvx-7.1.07/camera/camserver/include/ppg_util.h
+  contains i.e. I2C_PATTERN_BASE (= 0x4000, or 0x7800)
+~/vxtest/VPG517/mcb1/ppg/tvx-7.1.07/camera/camserver/progi2c/signals.c
+~/vxtest/VPG517/mcb1/ppg/tvx-7.1.07/camera/camserver/progi2c/sls_4x2_16.def

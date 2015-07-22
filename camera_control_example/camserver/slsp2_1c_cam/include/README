@@ -1,0 +1,22 @@
+Include files for the sls detector systems
+
+tvxcampkg.h - a bundle of include files to be included by camserver.c
+tvxcampkg_decl.h - declarations of variables for inclusion in camserver.c
+
+detsys.h - overall (top level) configuration of the system
+-- use this to turn on/off global configuration options
+
+cam_tbl.h - enums for cam_tble.c (a dynamically configured file)
+ioc_rpc.h - declarations for the rpc routines
+pix_detector.h - variables and signals for the pixel detector
+ppg_util.h - declarations for the pattern generator and fifo
+
+The following are for the gpib oscilloscope interface
+vxi11.h
+vxi11core.h
+vxi11intr.h
+
+The following are specific for the SPring8 BL38B1 extensions
+bl38_util.h
+bl_defs.h
+bl_ext.h

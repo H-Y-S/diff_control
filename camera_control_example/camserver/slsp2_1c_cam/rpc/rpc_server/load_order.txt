@@ -1,0 +1,8 @@
+order of loading to avoid undefined symbol messages:
+
+ld <vpg.o
+ld <fifo.o
+ld <rpcroutines.o
+ld <ioc_rpc_xdr.o
+ld <ioc_rpc_svc.o
+

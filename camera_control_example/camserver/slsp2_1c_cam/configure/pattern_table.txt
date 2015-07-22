@@ -1,0 +1,35 @@
+# pattern_table.txt - source data for the pattern loader, mkldpat
+# mkldpat acts on this table to produce "ldpatterns.gl"
+# Commands beginning with "cam" are passed directly to the .gl file.
+# The entry_point can have an optional offset in deciaml or hex.
+
+# NOTE: 'readbank', 'selall' & 'baser' are read by fifo.c - do not change names
+
+# modified 17.12.04 for p2_1chip
+
+highest_address 0x77ff					# do not conflict with base_i2cpat
+cam prog chsel 0x0
+cam stop
+
+# tvx_name	pattern_name		entry_point		comment
+
+basev       p2_vpg_ena          STAR+0
+basec2		p2_calpix	 		STAR+0	# row = +0x1a, col = +0x184
+baser0		p2_readchip_top		STAR+0	# upper 49 rows of chip
+baser1		p2_readchip_bot		STAR+0	# lower 48 rows
+baserb		p2_readback			STAR+0
+clear		p2_clear			STAR+0
+basec		p2_calibrate_all    STAR+0
+enable		p2_enable			STAR+0
+disable		p2_disable			STAR+0
+baseta		p2_trim_all			STAR+0		# program all trims
+
+# give camserver its symbolic base addresses
+cam base_i2cpat 0x7800
+cam base_readchip0 [baser0]
+cam base_readchip1 [baser1]
+cam base_trmall [baseta]
+#cam base_readback 	[baserb]
+#cam base_calib  	[basec]
+cam initialize
+cam prog chsel 0xffff

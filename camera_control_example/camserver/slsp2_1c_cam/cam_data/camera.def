@@ -1,0 +1,45 @@
+# camera.def - a camera definition file for tvx_sls_06_1 camera
+
+# These parameters are loaded during initialization.
+# Parameters are recognized by code in cam_tbl.c, which can be easily extended.
+# A different file may be loaded from the command line during operation
+
+
+camera_name = "tvx_pilatus2_1chip_camera"
+camera_wide = 60
+camera_high = 97
+camera_bpp = 16
+
+# following should be in cam_data_path - configures signals for VPG517
+ppg_configuration_file  p2_1chip.def
+
+# Normal data use lvl_1; inverted data use lvl_0; default is lvl_1.
+asserted_level_of_DATA  lvl_1
+
+# the fifo records 16-bit wide data (actually 32), corresponding to images
+# from 16 chips.  Here we select the active bit for each chip's image.
+# all 0's ends the list.
+# The selector bits can be in any order, but the images (0, 1, ...)
+# must be in order and contiguous because the first zero ends the array.
+# Bit order 			 16      -2-       1 16      -1-       1
+data_selector_image_0    0000 0000 0000 0000 0000 0000 0000 1000  
+#data_selector_image_1    0000 0000 0000 0000 0000 0000 0000 1000   
+data_selector_image_1    0000 0000 0000 0000 0000 0000 0000 0000  
+
+# load address in the pattern generator for certain patterns - now in ppg_util.h
+# trim_pattern_base 0x6000
+# trim_all_pattern_base 0x6800
+
+# code lines (not addresses) in pattern for poking values
+# trim_pattern_line_x
+# trim_pattern_line_y
+# trim_pattern_line_bit0
+# trim_pattern_line_bit1
+# trim_pattern_line_bit2
+# trim_pattern_line_bit3
+
+# trim_all_pattern_line_bit0
+# trim_all_pattern_line_bit1
+# trim_all_pattern_line_bit2
+# trim_all_pattern_line_bit3
+

@@ -1,0 +1,20 @@
+CHB 26.4.05 notes about trimming
+********************************
+ALL COMENTS are labeled with CHB
+
+Changes to trim Pilatus 2 chip:
+/home/det/p2_1chip/programs/tvx-7.2.33/camera/camserver/slsp2_1c_cam/include/ppg_util.h
+-> new entry points for file p2_trim_all
+/home/det/p2_1chip/programs/tvx-7.2.33/camera/camserver/slsp2_1c_cam/progi2c/ppg_util.c
+->added 2 bits
+camera/camserver/slsp2_1c_cam/include/detsys.h
+->changed MAX_TRIM_VALUE
+
+Files for loading autotrim.dat
+template: p2_loadtrim.src 
+setTrims (ppg_util.c) generates and executes p2_trimchip.abs
+A few adjustements in setTrim and /util/mktrimpat.c
+A few changes in
+/home/det/p2_1chip/programs/tvx-7.2.33/slsp2_1c/util/tscanner.c
+fifo.c modified to flip images horizontally
+find * -name "*.c" -print -exec grep Bad\ trim {} \;

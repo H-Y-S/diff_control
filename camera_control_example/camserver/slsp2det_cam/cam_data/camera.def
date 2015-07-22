@@ -1,0 +1,59 @@
+# camera.def - a camera definition file for tvx_sls_06_1 camera
+
+# These parameters are loaded during initialization.
+# Parameters are recognized by code in cam_tbl.c, which can be easily extended.
+# A different file may be loaded from the command line during operation
+
+
+camera_name = "PILATUS 6M - SN01"
+camera_wide = 2463
+camera_high = 2527
+camera_bpp = 32
+camera_sensor = "Silicon sensor, thickness 0.000320 m"
+camera_pixel_xy = "Pixel_size 172e-6 m x 172e-6 m"
+
+# following should be in cam_data_path - configures signals for I2C
+i2c_configuration_file   p2det.def
+
+# following should be in cam_data_path - configures detector hardware map
+detector_map   p6m.map
+
+# following should be in cam_data_path - gives voltage offsets for modules
+detector_offsets   p6m.off
+
+# following should be in cam_data path
+# this file specifies settings as a function of energy and gain
+detector_calibration_file   p6msettings.def
+
+# following should be in cam_data path
+# this file specifies settings as a function of energy and gain
+detector_calibration_file   m169_calibration.def
+
+# Normal data use lvl_1; inverted data use lvl_0; default is lvl_1.
+asserted_level_of_DATA  lvl_1
+
+# the fifo records 16-bit wide data (actually 32), corresponding to images
+# from 16 chips.  Here we select the active bit for each chip's image.
+# all 0's ends the list.
+# The selector bits can be in any order, but the images (0, 1, ...)
+# must be in order and contiguous because the first zero ends the array.
+# Bit order 			 16      -2-       1 16      -1-       1
+data_selector_image_0    0000 0000 0000 0000 0000 0000 0000 0001  # chip
+data_selector_image_1    0000 0000 0000 0000 0000 0000 0000 0010
+data_selector_image_2    0000 0000 0000 0000 0000 0000 0000 0100
+data_selector_image_3    0000 0000 0000 0000 0000 0000 0000 1000
+data_selector_image_4    0000 0000 0000 0000 0000 0000 0001 0000
+data_selector_image_5    0000 0000 0000 0000 0000 0000 0010 0000
+data_selector_image_6    0000 0000 0000 0000 0000 0000 0100 0000
+data_selector_image_7    0000 0000 0000 0000 0000 0000 1000 0000
+data_selector_image_8    0000 0000 0000 0000 0000 0001 0000 0000
+data_selector_image_9    0000 0000 0000 0000 0000 0010 0000 0000
+data_selector_image_10    0000 0000 0000 0000 0000 0100 0000 0000
+data_selector_image_11    0000 0000 0000 0000 0000 1000 0000 0000
+data_selector_image_12    0000 0000 0000 0000 0001 0000 0000 0000
+data_selector_image_13    0000 0000 0000 0000 0010 0000 0000 0000
+data_selector_image_14    0000 0000 0000 0000 0100 0000 0000 0000
+data_selector_image_15    0000 0000 0000 0000 1000 0000 0000 0000
+data_selector_image_16    0000 0000 0000 0000 0000 0000 0000 0000  # 0's to end
+
+

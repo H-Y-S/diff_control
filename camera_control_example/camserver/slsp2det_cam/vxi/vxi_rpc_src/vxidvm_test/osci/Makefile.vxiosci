@@ -1,0 +1,9 @@
+RD = ../RPCL
+TD = $(HOME)/bin/$(shell uname)
+CFLAGS = -I../RPCL
+
+vxioszi: vxioszi.c
+	gcc vxioszi.c $(RD)/vxi11core_xdr.c  -o vxioszi
+
+clean:
+	rm *.o

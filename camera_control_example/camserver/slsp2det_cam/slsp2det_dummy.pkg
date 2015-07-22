@@ -1,0 +1,126 @@
+// dummy package
+	case SeT:
+	case Reset:
+	case ProG:
+	case Show:
+	case Load:
+	case Save:
+	case Cpix:
+	case Cpix_x:
+	case Stop:
+	case Fillpix:
+	case SFillpix:
+	case Calibrate:
+	case Trim:
+	case Trim_all:
+	case SetTrims:
+	case TrimFromFile:
+	case LogImgFile:
+	case Read_signals:
+	case LogSettings:
+	case ImgMode:
+	case Gpibsend_volt:
+	case Gpibsend_scope:
+	case Gpibread_volt:
+	case Gpibread_scope:
+	case Scopeimg:
+	case NImages:
+	case NExpFrame:
+	case NFrameImg:
+	case ExpPeriod:
+	case ExtEnable:
+	case ExtTrigger:
+	case ExtMTrigger:
+	case Delay:
+	case DebTime:
+	case DataSection:
+	case VDelta:
+	case Tau:
+	case THread:
+	case SensorHtr:
+	case SetLimTH:
+	case SetSDelay:
+	case BitMode:
+	case Dcb_init:
+	case GapFill:
+	case DiscardMultIm:
+	case DacOffset:
+	case MXsettings:
+	case CalibFile:
+	case SetThreshold:
+	case LdBadPixMap:
+	case LdFlatField:
+	case SetAckInt:
+	case SetEnergy:
+	case ExpNaming:
+	case Cam_start:
+	
+		for(i=0; i<camera_count; i++)
+			if (cmnd == camera_list[i].cmnd)
+				break;
+
+		sprintf(line, "Command: %s %s", camera_list[i].name, ptr);
+		printf("%s\n", line);
+		OK_response(tx, Send, line);		// generic response
+
+		break;
+
+	case ImgonlY:
+		*imgfile = '\0';
+		if (*ptr)
+			{
+			if ( (p=strchr(ptr, ' ')) )		// remove trailing blanks
+				*p = '\0';
+			if (*ptr == '~')
+				{
+				strcpy(imgfile, getenv("HOME"));
+				strcat(imgfile, ptr+1);
+				}
+			else if ( strchr(ptr, '/') == NULL )	// no path - use default
+				{
+				strcpy(imgfile, cam_image_path);
+				strcat(imgfile, ptr);
+				}
+			else if (*ptr == '.')
+				{
+				sprintf(line, "*** Illegal filename: %s", ptr);
+				ERR_response(tx, Send, line);
+				printf("%s\n", line);
+				break;
+				}
+			else
+				strcpy(imgfile, ptr);		// path given
+			}
+		else		// no filename given - use auto
+			{
+			strcpy(imgfile, cam_image_path);
+			strcat(imgfile, autofilename);		// make up a filename
+			sprintf(imgfile+strlen(imgfile), "_%04d", filenumber);
+			filenumber++;
+			strcat(imgfile, ".tif");			// a default format
+			printf("  %s\n", imgfile);
+			}
+		endTime = startTime+exposure_time;	// be nice to log file
+		if (*imgfile)
+			{
+			camera_readout(imgfile, line);
+			DBG(3, "Imgonly file name: %s\n", imgfile)
+			set_cam_stat(cam_completed, imgfile);
+			}
+		else
+			printf("***Could not get the image file name\n");
+		OK_response(tx, CamCmd, imgfile);
+
+
+		n=mod=bank=chan=0;		// keep compiler happy
+		ixo=iyo=ixl=iyl=0;
+		devno=row=col=0;
+		p=cP=line2;
+		v=vcal=val1=value=0.0;
+		sp=NULL;
+		ofp=NULL;
+		hhi=hlo=thi=tlo=flag=0;
+		ui=0;
+
+		break;
+

@@ -1,0 +1,10 @@
+# list of settings to be logged to treport.txt
+# for the p2_1chip configuration
+VTRM
+VCCA
+VRF
+VRFS
+VADJ
+VCAL
+VDEL
+VCMP

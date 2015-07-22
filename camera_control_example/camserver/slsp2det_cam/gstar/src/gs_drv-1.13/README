@@ -1,0 +1,105 @@
+           A Linux driver for the PSI PMC-GigaSTaR I/O Module
+
+Author:  Eric F. Eikenberry, Detector Development Group, PSI, April 2005.
+
+Files:
+	README
+	gsd.c         -- the driver kernel module
+	gsd.h         -- kernel module definitions
+	gsdc.h        -- configuration data to share with the application
+	gsd_load.sh   -- script to load the module
+	gsd_unload.sh -- script to unload the module
+	Makefile
+	VERSION
+	GPL-2.0
+
+See also:
+	gslib.c  -- an interface library for use by applications
+	gslib.h  -- prototypes for the interface functions
+	gsdc.h   -- (above) also needed by applications
+
+
+----- INTRODUCTION
+
+	The Electronics Group of the Paul Scherrer Institute (PSI, CH-5232 Villigen-PSI, Switzerland) has developed a PCI (Peripheral 
+Component Interconncet) Mezzanine Card (PMC) for high-speed data acquisition and transmission between computers, or between a computer and an experimental device.  The card features the GigaSTaR chip set from Inova Semiconductors which is used to transmit data over a simple serial line at rates greater than 100 MBytes/sec.  Please refer to the "PMC-GigaSTaR High Speed Data I/O Module" documentation by Ch. Buehler, et. al, from the Electronics Group for full information.
+
+	A driver is a program that manages a hardware device on behalf of the operating system.  A driver should be a rather simple program that operates with very high efficiency and protects both the device and the operating system from accidental misuse (wrong values, impossible requests, etc.).  But, the driver should not implement or enforce policy; that is the responsibility of the application.
+
+	Traditional Linux (and Unix) drivers are linked to an entry (node) in the /dev directory (e.g., /dev/hda1) which has associated with it a 'major' and a 'minor' number.  Assuming that the drive has been loaded, when the device is opened (see open(2)), the major number tells the operating system which driver to use, and the minor number tells the driver which device or function it is handling.  Communication between the application program and the device is by means of the open(2), read(2), write(2), ioctl(2) and mmap(2) function calls to the operating system; programs do not directly access the driver, as it runs at the same privilege level as the kernel, and is not accessible to users.  A brief look at the directory /dev shows that there are thousands of entries.  The problem of proliferation of entries has become so extreme that the Linux core developers have placed a hold on adding new entries to /dev, and have recommended that a different approach be followed.  Of course, we could have added a private entry for our own systems, but it could not become officially sanctioned, and there is a better way.
+
+	The newest linux kernels, linux-2.6.6 and above, have a number of advantages over the very widely used linux-2.4.xx series of kernels.  Among these are a better scheduling algorithm, a pre-emptible kernel (the kernel itself, while working on a task, can be pre-empted by a higher priority task), and a number of new facilities for writers of device drivers.  A disadvantage of the 2.6.xx kernels is that they are still strongly under development, and are regarded as not entirely stable.  But, this situation is improving rapidly, and there is considerable new hardware that is supported in the 2.6.xx series, but has not yet been back-ported to the 2.4.xx series (now at 2.4.30).  I feel that we need the new features of the 2.6.xx kernels for our work, and that the world is ultimately not going back to the 2.4.xx series.
+
+	Rather than using the /dev formalism of traditional dirvers, gsd.c, the Linux driver from the Detector Development Group for the PMC-GigaSTaR boards, implements a pseudo-filesystem, called gsfs, that very much resembles /proc on Linux systems.  The driver (after successful compilation) is loaded (as root) and then the new file system is mounted on a mount point that is chosen at the convenience of the user.  Since mounting must be done by 'root', the superuser should change the permissions on the newly mounted file system to 'a+rwX' before exiting so that the user has full access.  Since computers for instrument control are rarely multiuser, it is simplest to install the driver and mount gsfs appropriately from an entry in /etc/rc.d/rc.local.
+
+
+----- CONFIGURING AND COMPILING
+
+    tar -zxf gs_drv-1.6.tgz will result in a directory, gs_drv-1.6, contining all the driver code.  '1.6' is the version number, and may differ from this value.
+
+    The file 'gsd.h' contains definitions of GS_VENDOR_ID and GS_DEVICE_ID, which are checked against the PMC-GigaSTaR firmware during module loading, and consequently may need to be changed if the firmware identifiers are revised.  Additionaly, the maximum size of the dma buffers, DMA_N_PAGES_MAX, is defined.  The supplied value is 57 pages, about 0.25 MByte.  The actual dma buffers are allocated during the mmap(2) call, and may be any smaller value than this maximum.  Up to 4 dma buffers, 2 for reading and 2 for writing (for each card), may be allocated.
+	
+	The file 'gsdc.h' defines the maximum number of PMC-GigaSTaR boards that the driver will support (GS_MAX_DEVICES).  The supplied configuration has 2, though there is no particular limit.
+    
+	After configuration, do 'make' in the gs_drv-1.6 directory.
+	
+	After a successful make, the module can be installed as root.  The shell script, 'gsd_load.sh' can be used to load the module, create the default mount point, and mount the gsfs file system.
+
+
+----- OPERATION
+
+	After the gsfs filesystem is mounted (by default on 'gsdev' in the user's home directory), the file 'gsdev/time', and the directory 'gsdev/gs0' are available; 'gsdev/gs0' in turn contains files 'BAR0', 'BAR1', 'read0', 'read1', 'write0' and 'write1'.  These sub-devices support access to the various functions of the PMC-GigaSTaR board and the driver.  If multiple PMC-GigaSTaR boards are installed, separate directories 'gs1', etc. appear for each board; however, only 1 'time' device appears.
+	
+	Below is a description of each of the supported devices (interfaces).  Refer to the library, gslib.c, and the test program, gst.c, to see examples of how these are used.
+	
+	A possible point of confusion are the terms dma read, and dma write.  In all cases, dma operations are with respect to the computer's memory.  So, a dma read operation reads from the computer's memory and feeds data to the PMC-GigaSTaR TX-fifo; a dma write operation takes data from the PMC-GigaSTaR RX-fifo and writes to computer memory.  This is comparable to the terminology used for hard disks: reading from the disk involves a dma write to computer memory.
+	
+	However, the device read and write operations supported by the driver are labeled with respect to the PMC-GigaSTaR card's functionality.  Thus the write(2) method is used to transmit data from the card; the read(2) method is used to receive data from the card.  Again, this is parallel to the terminology of a disk drive: read(2) is used to read from the disk, write(2) is used to write to the disk.
+	
+	The ioctl(2) method is defined for all devices, but its use is deprecated since only set/reset of the interrupt and a test function are defined; there are better ways to perform these functions with this driver.
+
+
+device file: BAR0
+    Provides read/write access to the 32-dword BAR0 register of the PMC-GigaSTaR board.  After opening the device, any dword, or block of dwords can be read.  Write operations are restricted to 1 dword register per operation, and only certain registers are accessible; register that are not write accessible (e.g., target address pointers) are set by a different mechanism.
+
+  Supported operations: open(2), lseek(2), read(2), write(2), close(2).
+
+
+device file: BAR1
+    Provides read/write access to the BAR1 register of the PMC-GigaSTaR board.  After opening the device, reads and writes access the RX-fifo and the TX-fifo, respectively.  Block transfers of any size are accepted, but the data is transferred to the kernel 1 page (1024 dwords) at a time, then written by the driver to the device 1 dword at a time.  Even so, it is rather fast.  lseek(2) is permitted, but is ignored.
+
+    Supported operations: open(2), read(2), write(2), close(2).
+
+
+device file: read0
+    Supports dma read operations using the first dma read buffer.  Data are read from the PMC-GigaSTaR RX_fifo and transferred to computer memory.  mmap(2) is used to allocate 1 or 2 dma buffers, which are mapped into user address space.  The result is a zero-copy dma transfer from the device to the user's buffer.
+
+    Supported operations: open(2), read(2), mmap(2), close(2).
+
+
+device file: read1
+    Supports dma read operations using the second dma read buffer.  See read0.
+ 
+    Supported operations: open(2), read(2), mmap(2), close(2).
+
+
+device file: write0
+    Supports dma write operations using the first dma write buffer.  Data are transferred from computer memory to the PMC-GigaSTaR TX-fifo.  mmap(2) is used to allocate 1 or 2 dma buffers, which are mapped into user address space.  The result is zero-copy transfer of data from the user's buffer to the device.
+
+    Supported operations: open(2), write(2), mmap(2), close(2).
+
+
+device file: write1
+    Supports dma write operations using the second dma write buffer.  See write0.
+  
+    Supported operations: open(2), write(2), mmap(2), close(2).
+
+
+device file: time
+    Access to the CPU time-stamp counter, and to the CMOS date and time.  Reading 8 bytes returns the CPU time-stamp counter.  This function executes in less 1 microsecond (depending on the cpu).
+    Reading 16 bytes gives both the CPU time-stamp counter and the CMOS date and time.  This is slow function (>30 microseconds), but gives a value that does not depend on the operating system's clock, which can lose up to 25% of its time on a heavily loaded system (linux-2.4.20 kernel).  The envisioned application is to read the CMOS time at the beginning of a tight loop, then use the time-stamp counter for incremental timing.  See gslib.c for an application.
+    In an unrelated feature, performing 'cat time' on the time device will print out the current CMOS date and time on the terminal.
+ 
+    Supported operations: open(2), read(2), close(2).
+
+

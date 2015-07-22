@@ -1,0 +1,335 @@
+# PILATUS 6M Module Voltage Offsets, 2006 Apr 27
+#
+# Offset is the measured offset of a DAC, and thus is to be
+#  -SUBTRACTED- from every request to set the given signal
+#
+# In case of duplicates, only the last value is retained
+#
+#  S/N  Signal  Offset
+# E.g.:
+#	42	VADJ	0.0003
+#	13  VCAL    0.0005
+#	4   VCMP10  -0.0001
+# changed vrf offset 25.8.06
+# values are subtracted
+# Bank 12
+	75	 VADJ		0.006
+	75   VRF     	0.003
+	75   VCAL     	0.011
+	75   VCMPX     	0.0108
+#	
+	106	 VADJ		-0.025
+	106  VRF    	-0.005
+	106  VCAL     	-0.012
+	106  VCMPX     	-0.0082
+#
+	64	 VADJ		-0.017
+	64   VRF     	-0.005
+	64   VCAL     	-0.010
+	64   VCMPX     	-0.0132
+#	
+#
+	123	 VADJ		-0.007
+	123  VRF     	0.0
+	123  VCAL     	-0.005
+	123  VCMPX     	0.002
+#	
+#
+	85	 VADJ		0.01
+	85   VRF     	0
+	85   VCAL     	-0.006
+	85   VCMPX     	0.016
+#
+# Bank 11
+	62	 VADJ		0.002
+	62   VRF     	0.02
+	62   VCAL     	0.012
+	62   VCMPX     	0.017
+#
+	124	 VADJ		-0.017
+	124  VRF     	0.0
+	124  VCAL     	-0.004
+	124  VCMPX     	0.0108
+#
+	107	 VADJ		-0.01
+	107  VRF    	-0.002
+	107  VCAL     	0.003
+	107  VCMPX     	0.0042
+#
+	73	 VADJ		-0.013
+	73   VRF     	-0.006
+	73   VCAL     	0.004
+	73   VCMPX     	0.0063
+#
+	61	 VADJ		-0.007
+	61   VRF     	-0.001
+	61   VCAL     	-0.007
+	61   VCMPX     	-0.0003
+#
+# Bank 10
+	134	 VADJ		-0.013
+	134  VRF    	-0.005
+	134  VCAL     	-0.004
+	134  VCMPX     	-0.0124
+#
+	131	 VADJ		-0.02
+	131  VRF    	-0.006
+	131  VCAL     	0.002
+	131  VCMPX     	-0.0141
+#
+	74	 VADJ		0.005
+	74	 VRF    	0.01
+	74	 VCAL     	-0.005
+	74   VCMPX     	0.0144
+#
+	68	 VADJ		-0.005
+	68	 VRF    	-0.005
+	68	 VCAL     	-0.009
+	68   VCMPX     	-0.0074
+#
+	118	 VADJ		0.003
+	118	 VRF    	-0.001
+	118	 VCAL     	-0.012
+	118  VCMPX     	0.0019
+#
+# Bank 9
+#
+	98	 VADJ		-0.009
+	98	 VRF    	-0.012
+	98	 VCAL     	0.0
+	98   VCMPX     	0.0003
+#
+	92	 VADJ		-0.005
+	92	 VRF    	-0.012
+	92	 VCAL     	-0.003
+	92   VCMPX     	0.0202
+#
+	105	 VADJ		-0.007
+	105	 VRF    	-0.002
+	105	 VCAL     	-0.007
+	105  VCMPX     	0.0048
+#
+	94	 VADJ		-0.006
+	94	 VRF    	-0.008
+	94	 VCAL     	-0.001
+	94   VCMPX     	-0.0035
+#
+	132	 VADJ		-0.017
+	132	 VRF    	-0.004
+	132	 VCAL     	-0.010
+	132  VCMPX     	-0.0102
+#
+# Bank 8
+#
+	72	 VADJ		-0.012
+	72	 VRF    	-0.007
+	72	 VCAL     	-0.005
+	72   VCMPX     	0.0046
+#
+	78	 VADJ		-0.008
+	78	 VRF    	-0.012
+	78	 VCAL     	0.001
+	78   VCMPX     	0.0014
+#
+	113	 VADJ		-0.004
+	113	 VRF    	-0.010
+	113	 VCAL     	0.0
+	113  VCMPX     	-0.0106
+#
+	93	 VADJ		0.026
+	93	 VRF    	-0.001
+	93	 VCAL     	0.005
+	93   VCMPX     	0.0011
+#
+	82	 VADJ		0.017
+	82	 VRF    	-0.018
+	82	 VCAL     	0.002
+	82   VCMPX     	0.0051
+#
+# Bank 7
+#
+	128	 VADJ		-0.027
+	128	 VRF    	-0.009
+	128	 VCAL     	-0.001
+	128  VCMPX     	-0.0188	
+#
+	117	 VADJ		-0.019
+	117	 VRF    	-0.011
+	117	 VCAL     	-0.011
+	117  VCMPX     	-0.0101
+#
+	104	 VADJ		0.009
+	104	 VRF    	0.008
+	104	 VCAL     	-0.002
+	104  VCMPX     	-0.024
+#
+	86	 VADJ		-0.008
+	86	 VRF    	-0.012
+	86	 VCAL     	0.003
+	86   VCMPX     	0.0156
+#
+	130	 VADJ		-0.015
+	130	 VRF    	-0.009
+	130	 VCAL     	0.008
+	130  VCMPX     	-0.0019
+#
+# Bank 6
+#
+	101	 VADJ		0.008
+	101	 VRF    	-0.013
+	101	 VCAL     	0.008
+	118  VCMPX     	0.0034	
+#
+	115	 VADJ		-0.011
+	115	 VRF    	-0.012
+	115	 VCAL     	-0.004
+	115  VCMPX     	-0.0081	
+#
+	129	 VADJ		-0.013
+	129	 VRF    	-0.008
+	129	 VCAL     	-0.002	
+	129  VCMPX     	-0.0093
+#
+	95	 VADJ		-0.01
+	95	 VRF    	-0.006
+	95	 VCAL     	-0.002
+#
+	100	 VADJ		0.007
+	100	 VRF    	-0.008
+	100	 VCAL     	-0.004
+	100  VCMPX     	0.0224
+#
+# Bank 5
+#
+	121	 VADJ		-0.014
+	121	 VRF    	-0.01
+	121	 VCAL     	-0.003
+	121  VCMPX     	0.0
+#
+	97	 VADJ		-0.01
+	97	 VRF    	0.0
+	97	 VCAL     	0.009
+	97   VCMPX     	-0.007
+#
+	81	 VADJ		0.011
+	81	 VRF    	0.003
+	81	 VCAL     	-0.006
+	81   VCMPX     	-0.0093
+#
+	80	 VADJ		-0.004
+	80	 VRF    	0.002
+	80	 VCAL     	0.012
+	80   VCMPX     	0.0005
+#
+	99	 VADJ		-0.001
+	99	 VRF    	-0.007
+	99	 VCAL     	-0.001
+	99   VCMPX     	0.0149
+#
+# Bank 4
+#
+	63	 VADJ		-0.01
+	63	 VRF    	-0.005
+	63	 VCAL     	-0.002
+	63  VCMPX     	-0.0134
+#
+	90	 VADJ		0.006
+	90	 VRF    	-0.003
+	90	 VCAL     	0.007
+	90   VCMPX     	0.0006
+#
+	145	 VADJ		-0.013
+	145	 VRF    	-0.005
+	145	 VCAL     	-0.002
+	145  VCMPX     	-0.0082
+#
+	83	 VADJ		-0.004
+	83	 VRF    	-0.005
+	83	 VCAL     	0.004
+	83   VCMPX     	0.0044
+#
+	138	 VADJ		-0.016
+	138	 VRF    	-0.012
+	138	 VCAL     	-0.001
+	138  VCMPX     	0.0041
+#
+# Bank 3
+#
+	57	 VADJ		0.011
+	57	 VRF    	-0.006
+	57	 VCAL     	0.005
+	57   VCMPX     	-0.0003
+#
+	146	 VADJ		-0.023
+	146	 VRF    	-0.016
+	146	 VCAL     	-0.001
+	146  VCMPX     	-0.0019
+#
+	139	 VADJ		-0.014
+	139	 VRF    	-0.001
+	139	 VCAL     	-0.005
+	139  VCMPX     	-0.0021
+#
+	135	 VADJ		-0.023
+	135	 VRF    	-0.007
+	135	 VCAL     	0.002
+	135  VCMPX     	-0.0002
+#
+	58	 VADJ		-0.000
+	58	 VRF    	0.01
+	58	 VCAL     	-0.005
+	58   VCMPX     	-0.0007
+#
+# Bank 2
+#
+	148	 VADJ		-0.025
+	148	 VRF    	-0.007
+	148	 VCAL     	0.007
+	148  VCMPX     	0.0109
+#
+	133	 VADJ		-0.004
+	133	 VRF    	-0.012
+	133	 VCAL     	-0.009
+	133  VCMPX     	-0.0029
+#
+	76	 VADJ		-0.023
+	76	 VRF    	-0.010
+	76	 VCAL     	-0.008
+	76  VCMPX     	-0.0003
+#
+	140	 VADJ		-0.017
+	140	 VRF    	-0.007
+	140	 VCAL     	0.002
+	140  VCMPX     	-0.0083
+#
+	110	 VADJ		-0.009
+	110	 VRF    	0.009
+	110	 VCAL     	-0.005
+	110  VCMPX     	0.0238
+#
+# Bank 1
+#
+	70	 VADJ		-0.016
+	70	 VRF    	-0.011
+	70	 VCAL     	-0.003
+	70   VCMPX     	-0.011	
+#
+	87	 VADJ		-0.001
+	87	 VRF    	-0.003
+	87	 VCAL     	-0.009
+	87  VCMPX     	0.0024	
+#
+	89	 VADJ		0.024
+	89	 VRF    	-0.002
+	89	 VCAL     	-0.005
+	89   VCMPX     	0.0107
+#
+	71	 VADJ		-0.009
+	71	 VRF    	-0.014
+	71	 VCAL     	-0.011
+	71   VCMPX     	-0.0111
+#
+	69	 VADJ		-0.018
+	69	 VRF    	0.003
+	69	 VCAL     	0.007
+	69   VCMPX     	0.0014

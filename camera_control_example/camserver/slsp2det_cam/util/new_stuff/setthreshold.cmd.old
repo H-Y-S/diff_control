@@ -1,0 +1,72 @@
+# set detector gain and threshold
+# PILATUS 100K  -  2010/Jan/13 15:45:07.091
+# Settings: mid gain; threshold: 6000 eV; vcmp: 0.760 V
+# Directory: /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/
+#
+dacoffset 0
+trim_all 63
+#
+LdCmndFile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/setdacs_b01_m01.dat
+#
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c00.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c01.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c02.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c03.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c04.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c05.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c06.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c07.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c08.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c09.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c10.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c11.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c12.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c13.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c14.dat
+prog b15_m07_chsel 0x0
+trimfromfile /home/det/p2_det/config/calibration/T5p9_vrf_m0p2_20070307/autotrim_b01_m01_c15.dat
+prog b15_m07_chsel 0x0
+#
+set B01_M01_VCMP0 0.7600
+set B01_M01_VCMP1 0.7600
+set B01_M01_VCMP2 0.7600
+set B01_M01_VCMP3 0.7600
+set B01_M01_VCMP4 0.7600
+set B01_M01_VCMP5 0.7600
+set B01_M01_VCMP6 0.7600
+set B01_M01_VCMP7 0.7600
+set B01_M01_VCMP8 0.7600
+set B01_M01_VCMP9 0.7600
+set B01_M01_VCMP10 0.7600
+set B01_M01_VCMP11 0.7600
+set B01_M01_VCMP12 0.7600
+set B01_M01_VCMP13 0.7600
+set B01_M01_VCMP14 0.7600
+set B01_M01_VCMP15 0.7600
+#
+set B01_M01_VCCA 0.7600
+#
+prog b15_m07_chsel 0xffff
+imgmode p
+imgonly /tmp/trim_values_img.tif
+LdFlatField 0
+LdBadPixMap 0
+#
+tau 200.4e-9
+imgmode x
+# Settings: MIDG: threshold: 6000 eV; vcmp (b01_m01_c00): 0.760 V
+#

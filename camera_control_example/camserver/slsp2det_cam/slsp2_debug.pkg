@@ -1,0 +1,35 @@
+// debug package
+	case SeT:
+	case Reset:
+	case ProG:
+	case Show:
+	case Load:
+	case Save:
+	case DataPath:
+	case ImgonlY:
+	case Trim:
+	case Trim_all:
+	case SetTrims:
+	case TrimFromFile:
+	case LogImgFile:
+	case Read_signals:
+	case LogSettings:
+	case ImgMode:
+	case SetNImages:
+	case DataSection:
+
+		i=n=mod=bank=0;		// keep compiler happy
+		p=cP=line2;
+		div=value=row=col=0;
+		vcal=val1=0.0;
+		sp=NULL;
+		stat=0;
+		addr=data=0;
+		dataL=0;
+		ofp=NULL;
+
+
+
+
+		break;
+
