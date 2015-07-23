@@ -27,7 +27,9 @@ class MotorAxis:
         self.mStepsPerUnit = MOTOR_AXIS_PARAMETERS[axisID-1][0]
         self.mRefPosSteps = MOTOR_AXIS_PARAMETERS[axisID-1][1]
         self.mRefPos = MOTOR_AXIS_PARAMETERS[axisID-1][2]
-        self.mPosSpeed = MOTOR_AXIS_PARAMETERS[axisID-1][3]
+
+        # Do not move at MAX speed
+        self.mPosSpeed = MOTOR_AXIS_PARAMETERS[axisID-1][3] / 2
         
         # Initialize the PCAN if necessary
         if not can_control.isInitialized():

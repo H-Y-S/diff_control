@@ -293,7 +293,7 @@ class DiffControl:
         self.set_widgets_sensitivity()
         self.set_labels_and_hideshow_fields()
         self.update_summary_fields()
-
+        
 
 
     def set_widgets_sensitivity(self):
@@ -304,6 +304,18 @@ class DiffControl:
         self.builder.get_object('frame2').set_sensitive(not self.mScanRunning)
         self.builder.get_object('start_scan_button').set_sensitive(not self.mScanRunning)
         self.builder.get_object('stop_scan_button').set_sensitive(self.mScanRunning)
+
+    # returns total images, n1 steps, n2 steps, acqN
+    def get_steps(self):
+        n1 = self.mMot1Step
+        if self.mScanType in SINGLE_MOTOR_SCANS :
+            n2 = 1
+        else :
+            n2 = self.mMot2Step
+        acqN = self.mAcqCount
+
+        return n1*n2*acqN,n1,n2,acqN
+        
         
     def update_summary_fields(self):
         n1 = self.mMot1Step
@@ -338,6 +350,16 @@ class DiffControl:
         else :
             self.builder.get_object('mot2_step_size').set_text('')            
 
+
+        self.update_scan_status_display()
+
+
+    def update_scan_status_display(self):
+        if not self.mScanRunning:
+            self.builder.get_object('scan_status_display').set_text("Scan not running")
+        else:
+            ntot,n1,n2,acqn = self.get_steps()
+            self.builder.get_object('scan_status_display').set_text("Image %d of %d" % (self.mScanPositionIndex,ntot))
 
     def calc_mot1_step_size(self):
         mot1size = 0
@@ -618,6 +640,8 @@ class DiffControl:
         DUAL_AXIS_LOG_DATA_STRING = "%0.4f : %0.4f : %0.4f : %0.4f: %0.4f : %s \n"
         while (self.mScanRunning) :
             if cameraReady :
+                gobject.idle_add(self.update_scan_status_display)
+                
                 # First write into the log file
                 if self.mScanPositionIndex == 0: # write headers in the first loop
                     if is_singleaxis:
