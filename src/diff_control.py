@@ -718,8 +718,8 @@ class DiffControl:
         logFile.close()
         
         print 'Scan thread ended : ' + finishMessage
-        ## TODO, enable the user interface on a normal scan finish
-
+        gobject.idle_add(self.update_view)
+        
         
 # If the program is run directly or passed as an argument to the python
 # interpreter then create a HelloWorld instance and show it
