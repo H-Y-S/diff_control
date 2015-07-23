@@ -1,8 +1,0 @@
-gst.o: gst.c \
-  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/debug.h \
-  include/gst.h include/gsdc.h \
-  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/gslib.h \
-  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/detsys.h \
-  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/pix_detector.h \
-  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/../slsp2det_cam/include/detsys.h \
-  /home/det/p2_det/programs/tvx-7.2.70-100329/camera/camserver/include/camserver.h

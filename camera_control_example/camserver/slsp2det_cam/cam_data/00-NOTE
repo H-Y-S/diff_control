@@ -1,6 +1,0 @@
-This directory is an example of how to set up "cam_data" for a detector.
-
-Most setups today use symbolic links for "calibration.def", "p2_det.map"
-and "p2_det.off", rather than having to edit "camera.def" 
-
-EFE

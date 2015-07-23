@@ -1,7 +1,0 @@
-note for directory src/gsd/misc
-
-This directory is used only for making the gsd-gst standalone setup; it
-is not ued in the normal tvx-camserver make tree.
-
-The linked entries (debug.c, mkheader.c) become resolved by the
-target 'make standalone' in the src directory.

@@ -1,1 +1,0 @@
-../../../include/tiff2.h

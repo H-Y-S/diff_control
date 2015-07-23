@@ -1,5 +1,7 @@
 # This class can be used to set and get parameter values from the camera
 # as well as to initiate/interrupt image taking
+# The Pilatus/Dectris camserver seems to end all strings sent with characted \030 (==\x18)
+# we can check for this character to be sure to read until end of each reply
 import telnetlib
 import pygtk
 pygtk.require('2.0')
@@ -40,7 +42,7 @@ class CameraComm:
         self.mTN.write("exptime\r\n")
 
         # Read response
-        resp = self.mTN.read_some()
+        resp = self.read_response() 
         print "Resp is:::" + resp + ":::"
 
         # Parse response
@@ -59,7 +61,7 @@ class CameraComm:
         self.mTN.write("exptime " + str(newExpTime) + "\r\n")
 
         # Read response
-        resp = self.mTN.read_some()
+        resp = self.read_response() 
         print "Resp is:::" + resp + ":::"
 
         # Parse response
@@ -78,7 +80,7 @@ class CameraComm:
         self.mTN.write("expperiod\r\n")
 
         # Read response
-        resp = self.mTN.read_some()
+        resp = self.read_response() 
         print "Resp is:::" + resp + ":::"
 
         # Parse response
@@ -98,7 +100,7 @@ class CameraComm:
         self.mTN.write("expperiod " + str(newExpPeriod) + "\r\n")
 
         # Read response
-        resp = self.mTN.read_some()
+        resp = self.read_response() 
         print "Resp is:::" + resp + ":::"
 
         # Parse response
@@ -125,7 +127,7 @@ class CameraComm:
 
         # The first response is to acknowledge the acquisition start
         # Read response
-        resp = self.mTN.read_some()
+        resp = self.read_response() 
         print "Resp is:::" + resp + ":::"
 
         # Parse response
@@ -133,6 +135,8 @@ class CameraComm:
         ok,resp = resp.split(' ',1)
 
         # Very short exposure might have finished already
+        # Actually with the new way of reading until 0x18, this
+        # ready response is not read at this point
         expfinished = False
         try :
             resp.index('7 OK')
@@ -154,6 +158,10 @@ class CameraComm:
         resp = self.mTN.read_eager()
         print "Resp is:::" + resp + ":::"
 
+        # If resp is not empty, and does not end with \030, read until \030 encountered
+        if not (resp == '') and not (resp[-1] == chr(0x18)):
+            resp = resp + self.read_response() # read until 0x18
+            
         try :
             resp.index('7 OK')
             return True
@@ -180,7 +188,7 @@ class CameraComm:
         self.mTN.write("imgpath\r\n")
 
         # Read response
-        resp = self.mTN.read_some()
+        resp = self.read_response()
         print "Resp is:::" + resp + ":::"
 
         code,resp = resp.split(' ',1)
@@ -199,7 +207,7 @@ class CameraComm:
         self.mTN.write("imgpath " + newpath + "\r\n")
         
         # Read response
-        resp = self.mTN.read_some()
+        resp = self.read_response()
         print "Resp is:::" + resp + ":::"
 
         code,resp = resp.split(' ',1)
@@ -217,6 +225,9 @@ class CameraComm:
 
         self.mTN.close()
 
+    def read_response(self):
+        resp = self.mTN.read_until(chr(0x18))
+        return resp
 
 
 class CamTest:
@@ -274,6 +285,8 @@ class CamTest:
         self.builder.get_object("main_window").show_all()
         gtk.main()
 
+    
+        
 def main():
     ct = CamTest()
     ct.run()

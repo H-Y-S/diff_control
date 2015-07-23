@@ -629,7 +629,9 @@ class DiffControl:
                         logFile.write(SINGLE_AXIS_LOG_DATA_STRING % (m1pos_imstart,m1pos_imend,acq_time,lastfilename))
                     else:
                         logFile.write(DUAL_AXIS_LOG_DATA_STRING % (m1pos_imstart,m1pos_imend,m2pos_imstart,m2pos_imend,acq_time,lastfilename))
-                
+                        
+                logFile.flush()
+
 
                 # If no more points need to be done, break from the loop
                 if self.mScanPositionIndex == total_images:

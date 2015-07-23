@@ -42,3 +42,10 @@ Thumbs.db
 #########
 *.pdf
 *.bak
+
+
+
+
+# Directories #
+###############
+camera_control_example/**
